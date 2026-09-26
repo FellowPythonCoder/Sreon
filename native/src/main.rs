@@ -655,8 +655,11 @@ const SREON_WEBVIEW_SCRIPT: &str = r#"
     #b_header, #b_content, #b_results, #b_tween, #b_pole { background: #17131e !important; color: #f8f4ec !important; }
     #b_results .b_algo { background: #211b2c !important; border-color: rgba(255,255,255,.1) !important; border-radius: 10px !important; padding: 14px !important; margin-bottom: 10px !important; }
     #sreon-web-bar { position: fixed; z-index: 2147483647; inset: 0 0 auto 0; height: 52px; display: flex; align-items: center; gap: 10px; padding: 0 18px; color: #f8f4ec; background: rgba(29,24,39,.96); border-bottom: 1px solid rgba(255,255,255,.12); box-shadow: 0 8px 25px rgba(0,0,0,.14); font: 12px -apple-system,BlinkMacSystemFont,Segoe UI,sans-serif; }
-    #sreon-web-bar .sreon-mark { display: inline-grid; place-items: center; width: 27px; height: 27px; color: #241c35; background: linear-gradient(145deg,#cdbbff,#9274ed); border-radius: 9px; font-weight: 800; }
-    #sreon-web-bar .sreon-name { font-weight: 700; letter-spacing: .12em; }
+    #sreon-web-bar .sreon-mark { display: inline-grid; place-items: center; width: 27px; height: 27px; color: #241c35; background: linear-gradient(145deg,#cdbbff,#9274ed); border-radius: 9px; }
+    #sreon-web-bar .sreon-mark svg { width: 20px; height: 20px; }
+    #sreon-web-bar .sreon-mark path { fill: #241c35; }
+    #sreon-web-bar .sreon-mark circle { fill: #fbf7ed; }
+    #sreon-web-bar .sreon-name {  font-weight: 700; letter-spacing: .12em; }
     #sreon-web-bar .sreon-context { margin-left: 5px; color: #aaa0b2; font-size: 10px; letter-spacing: .08em; }
     #sreon-web-bar .sreon-dot { width: 5px; height: 5px; margin-left: auto; background: #8ac7b5; border-radius: 50%; box-shadow: 0 0 0 4px rgba(138,199,181,.12); }
     #sreon-web-bar .sreon-protected { color: #8ac7b5; font-size: 10px; }
@@ -664,7 +667,7 @@ const SREON_WEBVIEW_SCRIPT: &str = r#"
   document.head.appendChild(style);
   const bar = document.createElement('div');
   bar.id = 'sreon-web-bar';
-  bar.innerHTML = '<span class="sreon-mark">S</span><span class="sreon-name">SREON</span><span class="sreon-context">SEARCH / OPEN WEB</span><span class="sreon-dot"></span><span class="sreon-protected">PROTECTED</span>';
+  bar.innerHTML = '<span class="sreon-mark"><svg viewBox="0 0 128 128" aria-label="Sreon"><path d="M89.2 38.2c-7.1-7.1-16.2-10.7-27.3-10.7-16.5 0-27.6 7.7-27.6 20 0 13 11.1 17.5 27.9 20.4 11 1.9 14.6 4.1 14.6 8.5 0 4.6-4.4 7.2-12.6 7.2-9.7 0-16.3-3.1-22.6-9.4l-8.8 11.2c7.9 8.2 18.1 12.3 30.9 12.3 17.6 0 29.2-8.1 29.2-21.2 0-12.9-9.4-18.3-27-21.3-11.5-2-15.5-3.7-15.5-7.8 0-3.9 4.1-6.2 11.7-6.2 8.6 0 14.3 2.6 19.4 7.7z"/><circle cx="99" cy="29" r="5"/></svg></span><span class="sreon-name">SREON</span><span class="sreon-context">SEARCH / OPEN WEB</span><span class="sreon-dot"></span><span class="sreon-protected">PROTECTED</span>';
   document.documentElement.appendChild(bar);
 })();
 "#;
