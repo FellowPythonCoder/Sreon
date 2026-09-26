@@ -1,0 +1,74 @@
+name: Native release builds
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install Linux libraries
+        run: sudo apt-get update && sudo apt-get install -y libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev
+      - name: Build binary
+        run: cargo build --release --manifest-path native/Cargo.toml
+      - name: Package deb and rpm metadata
+        run: |
+          cargo install cargo-deb cargo-rpm --locked
+          cargo deb --manifest-path native/Cargo.toml --output release/Sreon.deb
+          cargo rpm build --manifest-path native/Cargo.toml
+      - name: Prepare AppDir
+        run: bash native/packaging/build-linux.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sreon-linux-x86_64
+          path: |
+            native/target/release/sreon
+            release/*.deb
+            native/target/release/rpmbuild/RPMS/**/*.rpm
+            release/AppDir/**
+
+  macos:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin
+      - name: Build Apple Silicon app
+        run: |
+          cargo install cargo-bundle --locked
+          cd native
+          cargo bundle --release
+          cd ..
+          mkdir -p release
+          hdiutil create -volname Sreon -srcfolder native/target/aarch64-apple-darwin/release/bundle/osx/Sreon.app -ov -format UDZO release/Sreon.dmg
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sreon-macos-arm64
+          path: release/Sreon.dmg
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+      - name: Install NSIS
+        run: choco install nsis -y
+      - name: Build Windows executable and installer
+        shell: pwsh
+        run: .\native\packaging\build-windows.ps1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sreon-windows-x86_64
+          path: |
+            release/Sreon.exe
+            release/Sreon-Setup.exe
