@@ -207,19 +207,19 @@ impl SreonApp {
     fn draw_logo(&self, ui: &mut egui::Ui, size: f32) {
         let (rect, _) = ui.allocate_exact_size(Vec2::splat(size), Sense::hover());
         let painter = ui.painter();
-        painter.rect_filled(rect, egui::Rounding::same(size * .28), self.accent);
-        painter.circle_filled(rect.left_top() + Vec2::new(size * .76, size * .22), size * .045, CREAM);
-        let left = rect.left() + size * .27;
-        let right = rect.right() - size * .21;
-        let top = rect.top() + size * .25;
+        painter.rect_filled(rect, egui::Rounding::same(size * 0.28), self.accent);
+        painter.circle_filled(rect.left_top() + Vec2::new(size * 0.76, size * 0.22), size * 0.045, CREAM);
+        let left = rect.left() + size * 0.27;
+        let right = rect.right() - size * 0.21;
+        let top = rect.top() + size * 0.25;
         let mid = rect.center().y;
-        let bottom = rect.bottom() - size * .23;
-        let stroke = Stroke::new(size * .095, INK);
-        painter.line_segment([egui::pos2(right, top), egui::pos2(left + size * .19, top)], stroke);
-        painter.line_segment([egui::pos2(left + size * .19, top), egui::pos2(left, mid - size * .06)], stroke);
-        painter.line_segment([egui::pos2(left, mid - size * .06), egui::pos2(right - size * .09, mid + size * .07)], stroke);
-        painter.line_segment([egui::pos2(right - size * .09, mid + size * .07), egui::pos2(right - size * .17, bottom)], stroke);
-        painter.line_segment([egui::pos2(right - size * .17, bottom), egui::pos2(left, bottom)], stroke);
+        let bottom = rect.bottom() - size * 0.23;
+        let stroke = Stroke::new(size * 0.095, INK);
+        painter.line_segment([egui::pos2(right, top), egui::pos2(left + size * 0.19, top)], stroke);
+        painter.line_segment([egui::pos2(left + size * 0.19, top), egui::pos2(left, mid - size * 0.06)], stroke);
+        painter.line_segment([egui::pos2(left, mid - size * 0.06), egui::pos2(right - size * 0.09, mid + size * 0.07)], stroke);
+        painter.line_segment([egui::pos2(right - size * 0.09, mid + size * 0.07), egui::pos2(right - size * 0.17, bottom)], stroke);
+        painter.line_segment([egui::pos2(right - size * 0.17, bottom), egui::pos2(left, bottom)], stroke);
     }
 
     fn nav_button(&mut self, ui: &mut egui::Ui, glyph: &str, label: &str, view: View) {
@@ -323,12 +323,12 @@ impl SreonApp {
             ui.vertical(|ui| {
                 ui.label(RichText::new("SREON  /  A QUIETER WEB").size(10.0).color(self.accent).family(egui::FontFamily::Monospace));
                 ui.add_space(20.0);
-                ui.label(RichText::new("Make room\nfor curiosity.").size((available * .055).clamp(38.0, 61.0)).color(if self.theme == Theme::Dark { CREAM } else { INK }).strong());
+                ui.label(RichText::new("Make room\nfor curiosity.").size((available * 0.055).clamp(38.0, 61.0)).color(if self.theme == Theme::Dark { CREAM } else { INK }).strong());
                 ui.add_space(13.0);
                 ui.label(RichText::new("Search, read, and move through the web without\na browser getting in the way.").size(13.0).color(MUTED));
                 ui.add_space(23.0);
                 ui.horizontal(|ui| {
-                    let width = (available * .62).clamp(290.0, 520.0);
+                    let width = (available * 0.62).clamp(290.0, 520.0);
                     ui.add_sized([width, 43.0], egui::TextEdit::singleline(&mut self.query).hint_text("What are you curious about?").font(FontId::proportional(13.0)));
                     if ui.add_sized([96.0, 43.0], egui::Button::new("Explore  ↗").fill(self.accent)).clicked() { let query = self.query.clone(); self.search(&query); }
                 });
@@ -337,7 +337,7 @@ impl SreonApp {
                     for suggestion in ["quiet places", "Sreon browser", "inspiration for today"] { if ui.link(RichText::new(suggestion).size(10.0).color(MUTED)).clicked() { self.search(suggestion); } ui.add_space(7.0); }
                 });
             });
-            ui.with_layout(Layout::right_to_left(Align::Center), |ui| { self.draw_landscape(ui, (available * .32).clamp(230.0, 370.0)); });
+            ui.with_layout(Layout::right_to_left(Align::Center), |ui| { self.draw_landscape(ui, (available * 0.32).clamp(230.0, 370.0)); });
         });
         ui.add_space(42.0);
         ui.separator();
@@ -355,12 +355,12 @@ impl SreonApp {
         let (rect, _) = ui.allocate_exact_size(Vec2::new(width, 246.0), Sense::hover());
         let painter = ui.painter();
         painter.rect_filled(rect, egui::Rounding::same(18.0), Color32::from_rgb(106, 79, 159));
-        painter.circle_filled(rect.left_top() + Vec2::new(width * .54, 72.0), 53.0, Color32::from_rgb(255, 245, 211));
-        painter.circle_stroke(rect.left_top() + Vec2::new(width * .54, 72.0), 76.0, Stroke::new(1.0, Color32::from_rgba_premultiplied(255, 248, 225, 90)));
+        painter.circle_filled(rect.left_top() + Vec2::new(width * 0.54, 72.0), 53.0, Color32::from_rgb(255, 245, 211));
+        painter.circle_stroke(rect.left_top() + Vec2::new(width * 0.54, 72.0), 76.0, Stroke::new(1.0, Color32::from_rgba_premultiplied(255, 248, 225, 90)));
         let base = rect.bottom();
-        let back = vec![rect.left_bottom(), rect.left_top() + Vec2::new(width * .22, 100.0), rect.left_top() + Vec2::new(width * .47, 141.0), rect.left_top() + Vec2::new(width * .71, 94.0), rect.right_bottom()];
+        let back = vec![rect.left_bottom(), rect.left_top() + Vec2::new(width * 0.22, 100.0), rect.left_top() + Vec2::new(width * 0.47, 141.0), rect.left_top() + Vec2::new(width * 0.71, 94.0), rect.right_bottom()];
         painter.add(egui::Shape::convex_polygon(back, Color32::from_rgb(136, 110, 193), Stroke::NONE));
-        let front = vec![rect.left_top() + Vec2::new(width * .25, 195.0), rect.left_top() + Vec2::new(width * .57, 76.0), rect.left_top() + Vec2::new(width * .93, 213.0), rect.right_bottom(), rect.left_bottom()];
+        let front = vec![rect.left_top() + Vec2::new(width * 0.25, 195.0), rect.left_top() + Vec2::new(width * 0.57, 76.0), rect.left_top() + Vec2::new(width * 0.93, 213.0), rect.right_bottom(), rect.left_bottom()];
         painter.add(egui::Shape::convex_polygon(front, Color32::from_rgb(76, 55, 122), Stroke::NONE));
         painter.text(rect.right_bottom() - Vec2::new(16.0, 18.0), egui::Align2::RIGHT_BOTTOM, "A LITTLE MORE ROOM", FontId::monospace(9.0), Color32::from_rgba_premultiplied(255, 247, 224, 180));
         let _ = base;
@@ -431,7 +431,7 @@ impl SreonApp {
         ui.add_space(12.0);
         for index in 0..self.history.len() {
             let url = self.history[index].url.clone(); let title = self.history[index].title.clone(); let time = self.history[index].time.clone();
-            ui.horizontal(|ui| { ui.label(RichText::new("◷").size(18.0).color(self.accent)); ui.vertical(|ui| { ui.label(RichText::new(title).size(12.0).strong()); ui.label(RichText::new(url).size(10.0).color(MUTED).family(egui::FontFamily::Monospace)); }); ui.with_layout(Layout::right_to_left(Align::Center), |ui| { ui.label(RichText::new(time).size(10.0).color(DIM)); if ui.link("Open").clicked() { self.open_link(&url, None); } }); });
+            ui.horizontal(|ui| { ui.label(RichText::new("◷").size(18.0).color(self.accent)); ui.vertical(|ui| { ui.label(RichText::new(title).size(12.0).strong()); ui.label(RichText::new(&url).size(10.0).color(MUTED).family(egui::FontFamily::Monospace)); }); ui.with_layout(Layout::right_to_left(Align::Center), |ui| { ui.label(RichText::new(time).size(10.0).color(DIM)); if ui.link("Open").clicked() { self.open_link(&url, None); } }); });
             ui.separator();
         }
     }
@@ -548,7 +548,7 @@ impl App for SreonApp {
         });
         if self.customize_open { self.customizer(ctx); }
         if self.command_open { self.command_palette(ctx); }
-        if let Some((message, at)) = &self.toast { if at.elapsed() < Duration::from_secs(3) { egui::Area::new("toast").anchor(egui::Align2::RIGHT_BOTTOM, [-22.0, -25.0]).show(ctx, |ui| { egui::Frame::none().fill(PANEL_RAISED).rounding(egui::Rounding::same(8.0)).inner_margin(egui::Margin::symmetric(12.0, 9.0)).show(ui, |ui| { ui.label(RichText::new(format!("✓  {message}")).size(11.0)); }); }); ctx.request_repaint_after(Duration::from_millis(100)); } else { self.toast = None; } }
+        if let Some((message, at)) = &self.toast { if at.elapsed() < Duration::from_secs(3) { egui::Area::new("toast".into()).anchor(egui::Align2::RIGHT_BOTTOM, [-22.0, -25.0]).show(ctx, |ui| { egui::Frame::none().fill(PANEL_RAISED).rounding(egui::Rounding::same(8.0)).inner_margin(egui::Margin::symmetric(12.0, 9.0)).show(ui, |ui| { ui.label(RichText::new(format!("✓  {message}")).size(11.0)); }); }); ctx.request_repaint_after(Duration::from_millis(100)); } else { self.toast = None; } }
     }
 }
 
@@ -575,5 +575,5 @@ fn open_download_folder() {
 
 fn main() -> eframe::Result<()> {
     let native_options = NativeOptions { viewport: egui::ViewportBuilder::default().with_inner_size([1360.0, 860.0]).with_min_inner_size([960.0, 620.0]).with_title("Sreon"), ..Default::default() };
-    eframe::run_native("Sreon", native_options, Box::new(|cc| Ok(Box::new(SreonApp::new(cc)))))
+    eframe::run_native("Sreon", native_options, Box::new(|cc| Box::new(SreonApp::new(cc))))
 }

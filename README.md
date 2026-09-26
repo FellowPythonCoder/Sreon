@@ -45,7 +45,9 @@ Run these commands on macOS:
 
 ```bash
 cargo install cargo-bundle
-cargo bundle --release --manifest-path native/Cargo.toml
+cd native
+cargo bundle --release
+cd ..
 hdiutil create -volname Sreon -srcfolder native/target/release/bundle/osx/Sreon.app -ov -format UDZO Sreon.dmg
 ```
 

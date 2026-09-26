@@ -44,7 +44,9 @@ jobs:
       - name: Build Apple Silicon app
         run: |
           cargo install cargo-bundle --locked
-          cargo bundle --release --manifest-path native/Cargo.toml --target aarch64-apple-darwin
+          cd native
+          cargo bundle --release
+          cd ..
           mkdir -p release
           hdiutil create -volname Sreon -srcfolder native/target/aarch64-apple-darwin/release/bundle/osx/Sreon.app -ov -format UDZO release/Sreon.dmg
       - uses: actions/upload-artifact@v4
