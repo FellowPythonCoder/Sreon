@@ -2,6 +2,7 @@
   "name": "sreon-browser",
   "version": "1.0.0",
   "description": "Sreon — a quiet, privacy-focused desktop browser.",
+  "author": "Sreon",
   "private": true,
   "type": "module",
   "scripts": {
