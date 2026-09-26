@@ -8,8 +8,8 @@ license = "MIT"
 readme = "../README.md"
 
 [dependencies]
-eframe = { version = "0.27.2", default-features = true }
-egui = "0.27.2"
+eframe = { version = "0.30.0", default-features = true }
+egui = "0.30.0"
 open = "5.1.3"
 urlencoding = "2.1.3"
 directories = "5.0.1"

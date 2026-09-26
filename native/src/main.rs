@@ -151,6 +151,7 @@ impl SreonApp {
         if let Ok(handle) = cc.window_handle() {
             app.webview = WebViewBuilder::new()
                 .with_initialization_script(SREON_WEBVIEW_SCRIPT)
+                .with_visible(false)
                 .with_url("about:blank")
                 .build_as_child(&handle)
                 .ok();
@@ -650,6 +651,9 @@ const SREON_WEBVIEW_SCRIPT: &str = r#"
     body { padding-top: 52px !important; }
     a { color: #cdbbff !important; }
     input, textarea, select, button { color: #f8f4ec !important; background: #241e2d !important; border-color: rgba(255,255,255,.16) !important; }
+    #b_logo, .b_logo, #b_header .b_logo { display: none !important; }
+    #b_header, #b_content, #b_results, #b_tween, #b_pole { background: #17131e !important; color: #f8f4ec !important; }
+    #b_results .b_algo { background: #211b2c !important; border-color: rgba(255,255,255,.1) !important; border-radius: 10px !important; padding: 14px !important; margin-bottom: 10px !important; }
     #sreon-web-bar { position: fixed; z-index: 2147483647; inset: 0 0 auto 0; height: 52px; display: flex; align-items: center; gap: 10px; padding: 0 18px; color: #f8f4ec; background: rgba(29,24,39,.96); border-bottom: 1px solid rgba(255,255,255,.12); box-shadow: 0 8px 25px rgba(0,0,0,.14); font: 12px -apple-system,BlinkMacSystemFont,Segoe UI,sans-serif; }
     #sreon-web-bar .sreon-mark { display: inline-grid; place-items: center; width: 27px; height: 27px; color: #241c35; background: linear-gradient(145deg,#cdbbff,#9274ed); border-radius: 9px; font-weight: 800; }
     #sreon-web-bar .sreon-name { font-weight: 700; letter-spacing: .12em; }
@@ -673,7 +677,7 @@ fn open_download_folder() {
 
 fn main() {
     let native_options = NativeOptions { viewport: egui::ViewportBuilder::default().with_inner_size([1360.0, 860.0]).with_min_inner_size([960.0, 620.0]).with_title("Sreon"), ..Default::default() };
-    if let Err(error) = eframe::run_native("Sreon", native_options, Box::new(|cc| Box::new(SreonApp::new(cc)))) {
+    if let Err(error) = eframe::run_native("Sreon", native_options, Box::new(|cc| Ok(Box::new(SreonApp::new(cc))))) {
         eprintln!("Sreon error: {error}");
     }
 }
