@@ -1,41 +1,88 @@
 # Sreon Browser
 
-Sreon is a from-scratch, sidebar-first browser shell with a calm purple, cream, and glass visual system. The interface is built as a clean Vite app and can be packaged as an Electron desktop app for macOS, Windows, and Linux.
+Sreon is a from-scratch native desktop browser shell written in Rust. It does not start a localhost server, ship a web dashboard, or require Electron. The UI is drawn directly with `egui`/`eframe`, the release profile uses LTO and a single codegen unit, and links open in the user's external browser rather than inside an iframe.
 
-## Run the interface
+## Requirements
 
-```bash
-npm install
-npm run dev
-```
+- Rust stable toolchain (`rustup` recommended)
+- Linux: `libxcb`, `libxkbcommon`, and a working X11 or Wayland session
+- macOS 11 or newer for the Apple build
+- Windows 10 or newer for the Windows build
 
-For a production bundle:
-
-```bash
-npm run build
-npm run preview
-```
-
-## Desktop packaging
-
-The Electron entry point is `electron/main.cjs`. After building the web app, use the following on the target platform:
+## Run the native app
 
 ```bash
-npm run dist
+cargo run --manifest-path native/Cargo.toml
 ```
 
-Electron Builder is configured for:
+For an optimized local run:
 
-- macOS: DMG
-- Windows: NSIS installer and portable executable
-- Linux: AppImage, deb, and rpm
+```bash
+cargo run --release --manifest-path native/Cargo.toml
+```
 
-The logo family lives in `public/brand/`, with SVG source artwork plus platform icon exports. A signed, notarized, publishable release still requires platform-specific certificates and signing credentials.
+The app is fully native and does not use `localhost`.
 
-## Product notes
+## Build
 
-- Sidebar modes: expanded, compact, floating, pinned-style default, and auto-hide.
-- Search uses the live Wikipedia OpenSearch endpoint with a full-web DuckDuckGo fallback.
-- External destinations open in their original website; pages that permit embedding are shown in the browser view.
-- Tabs can be created, closed, pinned, duplicated, reordered by drag and drop, and muted-state represented.
-- Appearance, privacy, keyboard, workspace, history, bookmark, and download surfaces are functional local UI.
+```bash
+cargo build --release --manifest-path native/Cargo.toml
+```
+
+The optimized binary is written to:
+
+```text
+native/target/release/sreon
+```
+
+## Packaging
+
+The crate contains bundle metadata and platform packaging metadata in `native/Cargo.toml`.
+
+### macOS app and DMG
+
+Run these commands on macOS:
+
+```bash
+cargo install cargo-bundle
+cargo bundle --release --manifest-path native/Cargo.toml
+hdiutil create -volname Sreon -srcfolder native/target/release/bundle/osx/Sreon.app -ov -format UDZO Sreon.dmg
+```
+
+### Windows executable
+
+Run on Windows:
+
+```powershell
+cargo build --release --manifest-path native/Cargo.toml
+```
+
+The executable is:
+
+```text
+native\target\release\sreon.exe
+```
+
+Use an installer tool such as WiX or NSIS for `Sreon-Setup.exe`.
+
+### Linux packages
+
+```bash
+cargo install cargo-deb cargo-rpm
+cargo deb --manifest-path native/Cargo.toml
+cargo rpm build --manifest-path native/Cargo.toml
+cargo build --release --manifest-path native/Cargo.toml
+```
+
+The Linux binary can be wrapped as an AppImage with `appimagetool` using the metadata in `native/packaging/`.
+
+Cross-platform build jobs are defined in `.github/workflows/native-release.yml`. macOS and Windows installers must be built on their target operating systems for proper signing, native toolchains, and notarization.
+
+## Interaction model
+
+- Search and address submissions open in a real external browser.
+- macOS prefers Chrome, Firefox, Brave, or Edge before falling back to the system default; Linux uses `xdg-open`; Windows uses the system browser launcher.
+- Tabs support new, close, pin, mute, duplicate-style workflow, and compact management.
+- Sidebar modes include Expanded, Compact, Floating, Auto-hide, and Pinned.
+- Privacy, Settings, Bookmarks, History, Downloads, and open tabs are kept as focused native surfaces instead of oversized dashboard panels.
+- The Sreon mark is rendered as a symbol-only vector mark in the app chrome. SVG brand sources live in `public/brand/`.

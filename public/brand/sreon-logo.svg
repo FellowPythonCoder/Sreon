@@ -1,5 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 128">
-  <defs><linearGradient id="bg" x1="12" y1="8" x2="112" y2="120" gradientUnits="userSpaceOnUse"><stop stop-color="#cdbbff"/><stop offset="1" stop-color="#9274ed"/></linearGradient><linearGradient id="ink" x1="38" y1="24" x2="91" y2="104" gradientUnits="userSpaceOnUse"><stop stop-color="#241c35"/><stop offset="1" stop-color="#3c2a62"/></linearGradient></defs>
-  <rect x="4" y="4" width="120" height="120" rx="38" fill="url(#bg)"/><path d="M89.2 38.2c-7.1-7.1-16.2-10.7-27.3-10.7-16.5 0-27.6 7.7-27.6 20 0 13 11.1 17.5 27.9 20.4 11 1.9 14.6 4.1 14.6 8.5 0 4.6-4.4 7.2-12.6 7.2-9.7 0-16.3-3.1-22.6-9.4l-8.8 11.2c7.9 8.2 18.1 12.3 30.9 12.3 17.6 0 29.2-8.1 29.2-21.2 0-12.9-9.4-18.3-27-21.3-11.5-2-15.5-3.7-15.5-7.8 0-3.9 4.1-6.2 11.7-6.2 8.6 0 14.3 2.6 19.4 7.7z" fill="url(#ink)"/><circle cx="99" cy="29" r="5" fill="#fbf7ed" opacity=".9"/>
-  <text x="150" y="79" fill="#fbf7ed" font-family="Inter,Arial,sans-serif" font-size="56" font-weight="650" letter-spacing="-2">sreon</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Sreon symbol">
+  <defs>
+    <linearGradient id="sreon-lilac" x1="12" y1="8" x2="112" y2="120" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#cdbbff"/>
+      <stop offset="1" stop-color="#9274ed"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="120" height="120" rx="38" fill="url(#sreon-lilac)"/>
+  <path d="M89.2 38.2c-7.1-7.1-16.2-10.7-27.3-10.7-16.5 0-27.6 7.7-27.6 20 0 13 11.1 17.5 27.9 20.4 11 1.9 14.6 4.1 14.6 8.5 0 4.6-4.4 7.2-12.6 7.2-9.7 0-16.3-3.1-22.6-9.4l-8.8 11.2c7.9 8.2 18.1 12.3 30.9 12.3 17.6 0 29.2-8.1 29.2-21.2 0-12.9-9.4-18.3-27-21.3-11.5-2-15.5-3.7-15.5-7.8 0-3.9 4.1-6.2 11.7-6.2 8.6 0 14.3 2.6 19.4 7.7z" fill="#241c35"/>
+  <circle cx="99" cy="29" r="5" fill="#fbf7ed" opacity=".92"/>
 </svg>
