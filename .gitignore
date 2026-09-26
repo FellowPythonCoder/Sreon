@@ -1,0 +1,23 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+release/
+out/
+*.tsbuildinfo
+
+# generated raster brand assets (regenerate with `npm run icons`)
+brand/generated/
+
+# os / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
+npm-debug.log*
+
+# local caches
+.cache/
+.electron-cache/

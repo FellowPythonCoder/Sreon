@@ -1,0 +1,46 @@
+{
+  "name": "sreon",
+  "productName": "Sreon",
+  "version": "1.0.0",
+  "description": "Sreon — a fast, minimal, private, sidebar-first desktop browser.",
+  "author": {
+    "name": "Sreon",
+    "email": "hello@sreon.app"
+  },
+  "homepage": "https://sreon.app",
+  "license": "MIT",
+  "main": "dist/main/index.js",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "clean": "node scripts/clean.mjs",
+    "icons": "node scripts/make-icons.mjs",
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc --noEmit",
+    "start": "npm run build && electron .",
+    "dev": "node scripts/dev.mjs",
+    "preview": "node scripts/preview.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "pack": "npm run build && electron-builder --dir",
+    "dist": "npm run build && electron-builder -mwl",
+    "dist:linux": "npm run build && electron-builder --linux",
+    "dist:win": "npm run build && electron-builder --win",
+    "dist:mac": "npm run build && electron-builder --mac",
+    "dist:mac:cross": "npm run build && node scripts/package-mac.mjs",
+    "dmg": "bash scripts/make-dmg.sh"
+  },
+  "devDependencies": {
+    "@electron/packager": "20.3.0",
+    "@fiahfy/icns": "0.0.7",
+    "@preact/signals": "2.11.2",
+    "@types/node": "22.10.5",
+    "electron": "44.4.5",
+    "electron-builder": "26.15.3",
+    "esbuild": "0.28.2",
+    "png-to-ico": "3.0.2",
+    "preact": "10.29.8",
+    "sharp": "0.35.4",
+    "typescript": "5.7.3"
+  },
+  "dependencies": {}
+}
