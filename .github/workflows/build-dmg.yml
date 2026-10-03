@@ -3,6 +3,9 @@ on:
   workflow_dispatch:
   push:
     branches: [arena/01a103be-sreon]
+    paths-ignore: [artifacts/**]
+permissions:
+  contents: write
 jobs:
   build:
     runs-on: macos-15
@@ -25,6 +28,16 @@ jobs:
             build/Slate.dmg
             compile.log
           if-no-files-found: error
+      - name: Publish DMG to branch
+        if: steps.compile.outcome == 'success'
+        run: |
+          mkdir -p artifacts
+          cp build/Slate.dmg artifacts/Slate.dmg
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add -f artifacts/Slate.dmg
+          git commit -m "Attach verified Slate DMG [skip ci]"
+          git push origin HEAD:arena/01a103be-sreon
       - name: Verify build
         if: steps.compile.outcome != 'success'
         run: |
