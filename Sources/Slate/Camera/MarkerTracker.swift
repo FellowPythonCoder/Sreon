@@ -19,5 +19,5 @@ struct OneEuroFilter:Sendable{
 
 struct HSVPixel{var h:Double;var s:Double;var v:Double
  static func from(r:Double,g:Double,b:Double)->Self{let maxv=max(r,g,b),minv=min(r,g,b),d=maxv-minv;var h=0.0;if d != 0{if maxv==r{h=((g-b)/d).truncatingRemainder(dividingBy:6)}else if maxv==g{h=(b-r)/d+2}else{h=(r-g)/d+4};h/=6;if h<0{h+=1}};return Self(h:h,s:maxv==0 ? 0:d/maxv,v:maxv)}
- func matches(_ p:ColorProfile)->Bool{let hd=min(abs(h-p.hue),1-abs(h-p.hue));return hd<=p.tolerance && abs(s-p.saturation)<=p.tolerance*1.5 && abs(v-p.value)<=p.tolerance*1.5}}
+ func matches(_ p:ColorProfile)->Bool{let hd=min(abs(h-p.hue),1-abs(h-p.hue));return hd<=p.tolerance && abs(s-p.saturation)<=p.tolerance*1.5 && abs(v-p.value)<=p.tolerance*1.5}
 }
