@@ -28,5 +28,6 @@ jobs:
       - name: Verify build
         if: steps.compile.outcome != 'success'
         run: |
-          echo "::error title=Swift build failed::$(grep -B3 -E 'error:|failed|XCTAssert' compile.log | tail -30 | sed ':a;N;$!ba;s/\n/%0A/g')"
+          grep -B4 -A2 -E 'error:|failed|XCTAssert' compile.log | tail -60 > errors.txt
+          echo "::error title=Swift build failed::BASE64_$(base64 < errors.txt | tr -d '\n')"
           exit 1
