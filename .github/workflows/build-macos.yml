@@ -26,26 +26,34 @@ jobs:
           fetch-depth: 0
 
       - name: Build signed app bundle and DMG
-        run: ./scripts/package-macos.sh "$APP_ARCH"
+        shell: bash
+        run: |
+          mkdir -p artifacts
+          set -o pipefail
+          ./scripts/package-macos.sh "$APP_ARCH" 2>&1 | tee artifacts/build.log
 
       - name: Upload DMG artifact
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: Sreon-${{ env.APP_VERSION }}-mac-${{ env.APP_ARCH }}
           path: |
             artifacts/*.dmg
             artifacts/SHA256SUMS.txt
+            artifacts/build.log
           if-no-files-found: error
 
-      - name: Commit DMG back to branch
-        if: github.ref_name == 'arena/01a0ff6d-sreon'
+      - name: Commit build output back to branch
+        if: always() && github.ref_name == 'arena/01a0ff6d-sreon'
+        shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add artifacts/*.dmg artifacts/SHA256SUMS.txt
+          git add artifacts/build.log 2>/dev/null || true
+          git add artifacts/*.dmg artifacts/SHA256SUMS.txt 2>/dev/null || true
           if git diff --cached --quiet; then
-            echo "DMG unchanged; nothing to commit."
+            echo "No build output changed; nothing to commit."
           else
-            git commit -m "Add Sreon macOS DMG [skip ci]"
+            git commit -m "Add Sreon macOS build output [skip ci]"
             git push origin HEAD:${{ github.ref_name }}
           fi
