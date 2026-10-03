@@ -29,5 +29,5 @@ jobs:
         if: steps.compile.outcome != 'success'
         run: |
           grep -B4 -A2 -E 'error:|failed|XCTAssert' compile.log | tail -60 > errors.txt
-          echo "::error title=Swift build failed::BASE64_$(base64 < errors.txt | tr -d '\n')"
+          echo "::error title=Swift build failed::BASE64_$(head -c 2500 errors.txt | base64 | tr -d '\n')"
           exit 1
