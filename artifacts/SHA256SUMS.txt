@@ -1,1 +1,1 @@
-bb3919b8f2b25384ce35fa92313ad7a1ab73527b83ec86d78d0ab04b87a60b80  /Users/runner/work/Sreon/Sreon/artifacts/Sreon-1.0.0-mac-universal.dmg
+e423608c4147545c9deda49ffc18eb87adf4674a85e3d6621593d1a3f2a2b569  /Users/runner/work/Sreon/Sreon/artifacts/Sreon-1.0.0-mac-universal.dmg
