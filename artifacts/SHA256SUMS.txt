@@ -1,1 +1,1 @@
-4047732b21ccb3006d0473ce37849830aba1feae30be40d1295b0bb6ecf5a211  /Users/runner/work/Sreon/Sreon/artifacts/Sreon-1.0.0-mac-arm64.dmg
+bb3919b8f2b25384ce35fa92313ad7a1ab73527b83ec86d78d0ab04b87a60b80  /Users/runner/work/Sreon/Sreon/artifacts/Sreon-1.0.0-mac-universal.dmg

@@ -1,11 +1,4 @@
-Building for production...
-[0/4] Write sources
-[1/4] Write swift-version-76B232A4806BA581.txt
-[3/5] Compiling Sreon main.swift
-[3/5] Write Objects.LinkFileList
-[4/5] Linking Sreon
-Build complete! (9.99s)
 /Users/runner/work/Sreon/Sreon/dist/Sreon.app: replacing existing signature
-created: /Users/runner/work/Sreon/Sreon/artifacts/Sreon-1.0.0-mac-arm64.dmg
--rw-r--r--  1 runner  staff   133B Oct  3 01:58 /Users/runner/work/Sreon/Sreon/artifacts/SHA256SUMS.txt
--rw-r--r--@ 1 runner  staff   1.4M Oct  3 01:58 /Users/runner/work/Sreon/Sreon/artifacts/Sreon-1.0.0-mac-arm64.dmg
+created: /Users/runner/work/Sreon/Sreon/artifacts/Sreon-1.0.0-mac-universal.dmg
+-rw-r--r--  1 runner  staff   137B Oct  3 01:59 /Users/runner/work/Sreon/Sreon/artifacts/SHA256SUMS.txt
+-rw-r--r--@ 1 runner  staff   1.3M Oct  3 01:59 /Users/runner/work/Sreon/Sreon/artifacts/Sreon-1.0.0-mac-universal.dmg
