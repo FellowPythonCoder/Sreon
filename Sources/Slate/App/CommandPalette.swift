@@ -4,6 +4,15 @@ struct PaletteCommand:Identifiable{let id=UUID();let title:String;let symbol:Str
 struct CommandPalette:View{@EnvironmentObject var store:BoardStore;@Binding var isPresented:Bool;@State private var query=""
  var commands:[PaletteCommand]{[PaletteCommand(title:"New board",symbol:"plus",action:store.newBoard),PaletteCommand(title:"Board library",symbol:"square.grid.2x2",action:{store.showLibrary=true}),PaletteCommand(title:"Toggle camera marker mode",symbol:"camera",action:{store.cameraEnabled.toggle()}),PaletteCommand(title:"Zoom to fit",symbol:"arrow.up.left.and.down.right.magnifyingglass",action:{store.zoom=1;store.pan = .zero}),PaletteCommand(title:"Create version snapshot",symbol:"clock.arrow.circlepath",action:{store.snapshot()}),PaletteCommand(title:"Presentation mode",symbol:"play.rectangle",action:{store.presentationMode=true}),PaletteCommand(title:"Make visual guide",symbol:"point.3.connected.trianglepath.dotted",action:makeGuide),PaletteCommand(title:"Export PDF",symbol:"doc",action:{ExportService.exportPDF(store.current)}),PaletteCommand(title:"Copy canvas as image",symbol:"doc.on.clipboard",action:{ExportService.copyPNG(store.current)})]}
  var filtered:[PaletteCommand]{commands.filter{query.isEmpty || $0.title.localizedCaseInsensitiveContains(query)}}
- var body:some View{ZStack{Color.black.opacity(0.18).ignoresSafeArea().onTapGesture{isPresented=false};VStack(spacing:0){HStack{Image(systemName:"magnifyingglass");TextField("Type a command",text:$query).textFieldStyle(.plain).font(.title3)}.padding(16);Divider();ScrollView{VStack(spacing:4){ForEach(filtered){c in Button{c.action();isPresented=false}{HStack{Image(systemName:c.symbol).frame(width:24);Text(c.title);Spacer()}.padding(.horizontal,12).frame(height:38).contentShape(Rectangle())}.buttonStyle(.plain)}}.padding(6)}}.frame(width:520,height:380).background(.regularMaterial).clipShape(RoundedRectangle(cornerRadius:12)).shadow(color:.black.opacity(0.18),radius:14,y:6)} }
+ var body: some View {
+  ZStack {
+   Color.black.opacity(0.18).ignoresSafeArea().onTapGesture { isPresented = false }
+   VStack(spacing: 0) {
+    HStack { Image(systemName: "magnifyingglass"); TextField("Type a command", text: $query).textFieldStyle(.plain).font(.title3) }.padding(16)
+    Divider()
+    ScrollView { VStack(spacing: 4) { ForEach(filtered) { command in Button(action: { command.action(); isPresented = false }) { HStack { Image(systemName: command.symbol).frame(width: 24); Text(command.title); Spacer() }.padding(.horizontal, 12).frame(height: 38).contentShape(Rectangle()) }.buttonStyle(.plain) } }.padding(6) }
+   }.frame(width: 520, height: 380).background(.regularMaterial).clipShape(RoundedRectangle(cornerRadius: 12)).shadow(color: .black.opacity(0.18), radius: 14, y: 6)
+  }
+ }
  func makeGuide(){let selected=store.current.elements.filter{store.selection.contains($0.id)}.compactMap(\.text).joined(separator:"\n");guard !selected.isEmpty else{return};let generated=VisualGuideParser().makeElements(from:selected,layout:.stepCards,origin:CGPoint(x:100,y:100));store.mutate{$0.elements.append(contentsOf:generated)}}
 }
