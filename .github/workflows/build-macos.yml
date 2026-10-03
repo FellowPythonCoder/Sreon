@@ -5,39 +5,47 @@ on:
   push:
     branches:
       - arena/01a0ff6d-sreon
+    paths-ignore:
+      - 'artifacts/**'
+
+permissions:
+  contents: write
+
+env:
+  APP_VERSION: 1.0.0
+  APP_ARCH: arm64
 
 jobs:
   dmg:
-    name: Sreon macOS DMG
+    name: Native Sreon macOS DMG
     runs-on: macos-14
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
         with:
-          node-version: 22
-          cache: npm
+          fetch-depth: 0
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Build signed app bundle and DMG
+        run: ./scripts/package-macos.sh "$APP_ARCH"
 
-      - name: Build Apple Silicon DMG
-        env:
-          CSC_IDENTITY_AUTO_DISCOVERY: "false"
-        run: npm run build:mac
-
-      - name: Collect artifact
-        run: |
-          mkdir -p artifacts
-          cp release/*.dmg artifacts/
-          shasum -a 256 artifacts/*.dmg > artifacts/SHA256SUMS.txt
-          ls -lh artifacts
-
-      - name: Upload DMG
+      - name: Upload DMG artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Sreon-macOS-DMG
-          path: artifacts/*
+          name: Sreon-${{ env.APP_VERSION }}-mac-${{ env.APP_ARCH }}
+          path: |
+            artifacts/*.dmg
+            artifacts/SHA256SUMS.txt
           if-no-files-found: error
+
+      - name: Commit DMG back to branch
+        if: github.ref_name == 'arena/01a0ff6d-sreon'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add artifacts/*.dmg artifacts/SHA256SUMS.txt
+          if git diff --cached --quiet; then
+            echo "DMG unchanged; nothing to commit."
+          else
+            git commit -m "Add Sreon macOS DMG [skip ci]"
+            git push origin HEAD:${{ github.ref_name }}
+          fi
