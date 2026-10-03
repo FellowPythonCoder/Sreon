@@ -11,7 +11,7 @@ struct SlateCanvas:NSViewRepresentable{
 @MainActor final class CanvasHostView:NSView,MTKViewDelegate{
  weak var store:BoardStore?; private let metalView:MTKView; private var live:[CanvasPoint]=[]; private var dragStart:CGPoint?; private var laser:[(CGPoint,Date)]=[]
  override var isFlipped:Bool{true}; override var acceptsFirstResponder:Bool{true}
- override init(frame:NSRect){let device=MTLCreateSystemDefaultDevice();metalView=MTKView(frame:frame,device:device);super.init(frame:frame);wantsLayer=true;metalView.delegate=self;metalView.isPaused=false;metalView.enableSetNeedsDisplay=false;metalView.preferredFramesPerSecond=NSScreen.main?.maximumFramesPerSecond ?? 60;metalView.framebufferOnly=true;addSubview(metalView,position:.below,relativeTo:nil);registerForDraggedTypes([.fileURL,.string,.tiff,.png]);allowedTouchTypes=[.indirect]}
+ override init(frame:NSRect){let device=MTLCreateSystemDefaultDevice();metalView=MTKView(frame:frame,device:device);super.init(frame:frame);wantsLayer=true;metalView.delegate=self;metalView.isPaused=false;metalView.enableSetNeedsDisplay=false;metalView.preferredFramesPerSecond=NSScreen.main?.maximumFramesPerSecond ?? 60;metalView.framebufferOnly=true;addSubview(metalView,positioned:.below,relativeTo:nil);registerForDraggedTypes([.fileURL,.string,.tiff,.png]);allowedTouchTypes=[.indirect]}
  required init?(coder:NSCoder){fatalError()}
  override func layout(){super.layout();metalView.frame=bounds}
  func mtkView(_ view:MTKView,drawableSizeWillChange size:CGSize){}
