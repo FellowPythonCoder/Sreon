@@ -201,7 +201,7 @@ final class TabPill: NSView {
     @objc private func closeTapped() { onClose() }
 }
 
-final class StartPageView: NSView, NSTextFieldDelegate {
+final class StartPageView: NSView, NSSearchFieldDelegate {
     let searchField = NSSearchField()
     var onSubmit: ((String) -> Void)?
     var onQuickLink: ((String) -> Void)?
@@ -323,7 +323,7 @@ final class StartPageView: NSView, NSTextFieldDelegate {
     }
 }
 
-final class BrowserView: NSView, NSTextFieldDelegate, WKNavigationDelegate, WKUIDelegate {
+final class BrowserView: NSView, NSSearchFieldDelegate, WKNavigationDelegate, WKUIDelegate {
     private let processPool = WKProcessPool()
     private var tabs: [BrowserTab] = []
     private var activeIndex = 0
