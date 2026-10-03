@@ -13,9 +13,23 @@ ARTIFACTS="$ROOT/artifacts"
 rm -rf "$DIST"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" "$ARTIFACTS"
 
-swift build -c release --arch "$ARCH"
-BIN_DIR="$(swift build -c release --arch "$ARCH" --show-bin-path)"
-cp "$BIN_DIR/$APP_NAME" "$APP/Contents/MacOS/$APP_NAME"
+build_for_arch() {
+  local build_arch="$1"
+  swift build -c release --arch "$build_arch"
+  swift build -c release --arch "$build_arch" --show-bin-path
+}
+
+if [[ "$ARCH" == "universal" ]]; then
+  ARM_BIN_DIR="$(build_for_arch arm64 | tail -n 1)"
+  X64_BIN_DIR="$(build_for_arch x86_64 | tail -n 1)"
+  lipo -create \
+    "$ARM_BIN_DIR/$APP_NAME" \
+    "$X64_BIN_DIR/$APP_NAME" \
+    -output "$APP/Contents/MacOS/$APP_NAME"
+else
+  BIN_DIR="$(build_for_arch "$ARCH" | tail -n 1)"
+  cp "$BIN_DIR/$APP_NAME" "$APP/Contents/MacOS/$APP_NAME"
+fi
 chmod +x "$APP/Contents/MacOS/$APP_NAME"
 cp "$ROOT/build/icon.icns" "$APP/Contents/Resources/Sreon.icns"
 

@@ -16,7 +16,7 @@ Sreon is a minimalist, macOS-first browser built natively with **Swift + AppKit 
 The GitHub Actions workflow writes the built installer to:
 
 ```text
-artifacts/Sreon-1.0.0-mac-arm64.dmg
+artifacts/Sreon-1.0.0-mac-universal.dmg
 ```
 
 That file is generated on a macOS runner because Linux cannot run Apple's `hdiutil` or compile AppKit/WebKit apps.
@@ -24,7 +24,7 @@ That file is generated on a macOS runner because Linux cannot run Apple's `hdiut
 ## Build on macOS
 
 ```bash
-./scripts/package-macos.sh arm64
+./scripts/package-macos.sh universal
 ```
 
 The build script:
@@ -33,7 +33,7 @@ The build script:
 2. Wraps the binary into `dist/Sreon.app`.
 3. Adds the Sreon app icon and Info.plist metadata.
 4. Ad-hoc signs the app bundle.
-5. Creates `artifacts/Sreon-1.0.0-mac-arm64.dmg`.
+5. Creates `artifacts/Sreon-1.0.0-mac-universal.dmg`.
 6. Writes `artifacts/SHA256SUMS.txt`.
 
 ## Project layout
