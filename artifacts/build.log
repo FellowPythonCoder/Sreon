@@ -1,0 +1,17 @@
+Building for production...
+[0/4] Write sources
+[1/4] Write swift-version-76B232A4806BA581.txt
+[3/5] Compiling Sreon main.swift
+/Users/runner/work/Sreon/Sreon/Sources/Sreon/main.swift:253:32: error: cannot assign value of type 'StartPageView' to type '(any NSSearchFieldDelegate)?'
+        searchField.delegate = self
+                               ^~~~
+/Users/runner/work/Sreon/Sreon/Sources/Sreon/main.swift:253:32: note: add missing conformance to 'NSSearchFieldDelegate' to class 'StartPageView'
+        searchField.delegate = self
+                               ^
+/Users/runner/work/Sreon/Sreon/Sources/Sreon/main.swift:407:33: error: cannot assign value of type 'BrowserView' to type '(any NSSearchFieldDelegate)?'
+        addressField.delegate = self
+                                ^~~~
+/Users/runner/work/Sreon/Sreon/Sources/Sreon/main.swift:407:33: note: add missing conformance to 'NSSearchFieldDelegate' to class 'BrowserView'
+        addressField.delegate = self
+                                ^
+error: fatalError
