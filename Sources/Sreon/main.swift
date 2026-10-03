@@ -140,55 +140,67 @@ final class BrowserTab {
 final class TabPill: NSView {
     private let onSelect: () -> Void
     private let onClose: () -> Void
-    private let active: Bool
 
     init(title: String, active: Bool, onSelect: @escaping () -> Void, onClose: @escaping () -> Void) {
         self.onSelect = onSelect
         self.onClose = onClose
-        self.active = active
         super.init(frame: .zero)
         translatesAutoresizingMaskIntoConstraints = false
         wantsLayer = true
-        layer?.cornerRadius = 17
+        layer?.cornerRadius = 18
+        layer?.masksToBounds = false
         layer?.backgroundColor = active
-            ? NSColor.adaptive(light: .white, dark: NSColor.white.withAlphaComponent(0.12)).cg
-            : NSColor.clear.cg
+            ? NSColor.adaptive(light: NSColor.white.withAlphaComponent(0.66), dark: NSColor.white.withAlphaComponent(0.16)).cg
+            : NSColor.adaptive(light: NSColor.white.withAlphaComponent(0.18), dark: NSColor.white.withAlphaComponent(0.055)).cg
         layer?.borderColor = active
-            ? NSColor.adaptive(light: NSColor.black.withAlphaComponent(0.10), dark: NSColor.white.withAlphaComponent(0.14)).cg
-            : NSColor.clear.cg
-        layer?.borderWidth = active ? 1 : 0
+            ? NSColor.adaptive(light: NSColor.white.withAlphaComponent(0.88), dark: NSColor.white.withAlphaComponent(0.24)).cg
+            : NSColor.adaptive(light: NSColor.white.withAlphaComponent(0.30), dark: NSColor.white.withAlphaComponent(0.08)).cg
+        layer?.borderWidth = 1
+        if active {
+            layer?.shadowColor = NSColor.systemBlue.withAlphaComponent(0.28).cg
+            layer?.shadowOpacity = 0.32
+            layer?.shadowRadius = 16
+            layer?.shadowOffset = NSSize(width: 0, height: 8)
+        }
 
-        let dot = NSView()
-        dot.translatesAutoresizingMaskIntoConstraints = false
-        dot.wantsLayer = true
-        dot.layer?.cornerRadius = 4
-        dot.layer?.backgroundColor = NSColor(red: 0.15, green: 0.39, blue: 0.92, alpha: 1).cg
+        let initial = title.trimmingCharacters(in: .whitespacesAndNewlines).first.map { String($0).uppercased() } ?? "S"
+        let orb = RoundedView(
+            fill: active
+                ? NSColor(red: 0.72, green: 0.90, blue: 1.0, alpha: 0.95)
+                : NSColor.adaptive(light: NSColor.white.withAlphaComponent(0.62), dark: NSColor.white.withAlphaComponent(0.12)),
+            stroke: NSColor.adaptive(light: NSColor.white.withAlphaComponent(0.76), dark: NSColor.white.withAlphaComponent(0.18)),
+            radius: 12
+        )
+        let initialLabel = makeLabel(initial, font: .systemFont(ofSize: 12, weight: .bold), color: active ? .black : .labelColor, alignment: .center)
+        orb.addSubview(initialLabel)
 
-        let label = makeLabel(title, font: .systemFont(ofSize: 13, weight: .medium), color: active ? .labelColor : .secondaryLabelColor)
+        let label = makeLabel(title, font: .systemFont(ofSize: 13.5, weight: active ? .semibold : .medium), color: active ? .labelColor : .secondaryLabelColor)
         label.lineBreakMode = .byTruncatingTail
 
         let close = NSButton(title: "×", target: self, action: #selector(closeTapped))
         close.translatesAutoresizingMaskIntoConstraints = false
         close.isBordered = false
-        close.font = .systemFont(ofSize: 16, weight: .regular)
+        close.font = .systemFont(ofSize: 17, weight: .regular)
         close.contentTintColor = .secondaryLabelColor
+        close.toolTip = "Close tab"
 
-        let stack = NSStackView(views: [dot, label, close])
+        let stack = NSStackView(views: [orb, label, close])
         stack.translatesAutoresizingMaskIntoConstraints = false
         stack.orientation = .horizontal
         stack.alignment = .centerY
-        stack.spacing = 7
+        stack.spacing = 9
         addSubview(stack)
 
         NSLayoutConstraint.activate([
-            widthAnchor.constraint(greaterThanOrEqualToConstant: 132),
-            widthAnchor.constraint(lessThanOrEqualToConstant: 230),
-            heightAnchor.constraint(equalToConstant: 34),
-            dot.widthAnchor.constraint(equalToConstant: 8),
-            dot.heightAnchor.constraint(equalToConstant: 8),
+            heightAnchor.constraint(equalToConstant: 48),
+            widthAnchor.constraint(equalToConstant: 216),
+            orb.widthAnchor.constraint(equalToConstant: 26),
+            orb.heightAnchor.constraint(equalToConstant: 26),
             close.widthAnchor.constraint(equalToConstant: 18),
-            stack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 11),
-            stack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8),
+            initialLabel.centerXAnchor.constraint(equalTo: orb.centerXAnchor),
+            initialLabel.centerYAnchor.constraint(equalTo: orb.centerYAnchor),
+            stack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
+            stack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10),
             stack.centerYAnchor.constraint(equalTo: centerYAnchor)
         ])
 
@@ -217,98 +229,187 @@ final class StartPageView: NSView, NSSearchFieldDelegate {
 
     override func draw(_ dirtyRect: NSRect) {
         let gradient = NSGradient(colors: [
-            NSColor.adaptive(light: NSColor(red: 0.98, green: 0.99, blue: 1.0, alpha: 1), dark: NSColor(red: 0.05, green: 0.07, blue: 0.10, alpha: 1)),
-            NSColor.adaptive(light: NSColor(red: 0.94, green: 0.96, blue: 1.0, alpha: 1), dark: NSColor(red: 0.03, green: 0.04, blue: 0.07, alpha: 1))
+            NSColor.adaptive(light: NSColor(red: 0.88, green: 0.93, blue: 1.0, alpha: 1), dark: NSColor(red: 0.035, green: 0.047, blue: 0.075, alpha: 1)),
+            NSColor.adaptive(light: NSColor(red: 0.97, green: 0.88, blue: 0.98, alpha: 1), dark: NSColor(red: 0.08, green: 0.05, blue: 0.13, alpha: 1)),
+            NSColor.adaptive(light: NSColor(red: 0.78, green: 0.88, blue: 1.0, alpha: 1), dark: NSColor(red: 0.03, green: 0.10, blue: 0.18, alpha: 1))
         ])
-        gradient?.draw(in: bounds, angle: -90)
+        gradient?.draw(in: bounds, angle: -28)
 
-        NSColor(red: 0.0, green: 0.76, blue: 1.0, alpha: 0.18).setFill()
-        NSBezierPath(ovalIn: NSRect(x: bounds.minX + 120, y: bounds.maxY - 280, width: 260, height: 260)).fill()
-        NSColor(red: 0.29, green: 0.37, blue: 1.0, alpha: 0.13).setFill()
-        NSBezierPath(ovalIn: NSRect(x: bounds.maxX - 390, y: bounds.minY + 90, width: 330, height: 330)).fill()
+        func blob(_ rect: NSRect, _ color: NSColor) {
+            color.setFill()
+            NSBezierPath(ovalIn: rect).fill()
+        }
+        blob(NSRect(x: bounds.minX + bounds.width * 0.06, y: bounds.maxY - 330, width: 360, height: 360), NSColor(red: 0.0, green: 0.80, blue: 1.0, alpha: 0.20))
+        blob(NSRect(x: bounds.midX - 150, y: bounds.midY - 80, width: 430, height: 430), NSColor(red: 1.0, green: 0.25, blue: 0.78, alpha: 0.16))
+        blob(NSRect(x: bounds.maxX - 460, y: bounds.minY + 70, width: 420, height: 420), NSColor(red: 0.25, green: 0.34, blue: 1.0, alpha: 0.20))
+        blob(NSRect(x: bounds.maxX - 670, y: bounds.maxY - 260, width: 260, height: 260), NSColor(red: 1.0, green: 0.65, blue: 0.18, alpha: 0.14))
+    }
+
+    private func makeDot(_ color: NSColor) -> NSView {
+        let dot = NSView()
+        dot.translatesAutoresizingMaskIntoConstraints = false
+        dot.wantsLayer = true
+        dot.layer?.cornerRadius = 5
+        dot.layer?.backgroundColor = color.cg
+        NSLayoutConstraint.activate([
+            dot.widthAnchor.constraint(equalToConstant: 10),
+            dot.heightAnchor.constraint(equalToConstant: 10)
+        ])
+        return dot
+    }
+
+    private func makeQuickButton(_ title: String, url: String) -> NSButton {
+        let button = NSButton(title: title, target: self, action: #selector(quickLinkTapped(_:)))
+        button.identifier = NSUserInterfaceItemIdentifier(url)
+        button.isBordered = false
+        button.wantsLayer = true
+        button.layer?.cornerRadius = 18
+        button.layer?.backgroundColor = NSColor.adaptive(light: NSColor.white.withAlphaComponent(0.38), dark: NSColor.white.withAlphaComponent(0.10)).cg
+        button.layer?.borderColor = NSColor.adaptive(light: NSColor.white.withAlphaComponent(0.70), dark: NSColor.white.withAlphaComponent(0.16)).cg
+        button.layer?.borderWidth = 1
+        button.contentTintColor = .labelColor
+        button.font = .systemFont(ofSize: 13, weight: .semibold)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.heightAnchor.constraint(equalToConstant: 36).isActive = true
+        button.widthAnchor.constraint(greaterThanOrEqualToConstant: 92).isActive = true
+        return button
+    }
+
+    private func makeInfoCard(number: String, title: String, detail: String) -> NSView {
+        let card = RoundedView(
+            fill: NSColor.adaptive(light: NSColor.white.withAlphaComponent(0.36), dark: NSColor.white.withAlphaComponent(0.085)),
+            stroke: NSColor.adaptive(light: NSColor.white.withAlphaComponent(0.62), dark: NSColor.white.withAlphaComponent(0.13)),
+            radius: 22
+        )
+        let n = makeLabel(number, font: .systemFont(ofSize: 11, weight: .heavy), color: NSColor.systemBlue)
+        let t = makeLabel(title, font: .systemFont(ofSize: 14, weight: .bold), color: .labelColor)
+        let d = makeLabel(detail, font: .systemFont(ofSize: 12.5, weight: .regular), color: .secondaryLabelColor)
+        d.lineBreakMode = .byWordWrapping
+        d.maximumNumberOfLines = 2
+        let stack = NSStackView(views: [n, t, d])
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        stack.orientation = .vertical
+        stack.alignment = .leading
+        stack.spacing = 5
+        card.addSubview(stack)
+        NSLayoutConstraint.activate([
+            card.widthAnchor.constraint(equalToConstant: 190),
+            card.heightAnchor.constraint(equalToConstant: 116),
+            stack.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 18),
+            stack.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -16),
+            stack.centerYAnchor.constraint(equalTo: card.centerYAnchor)
+        ])
+        return card
     }
 
     private func setup() {
-        let card = RoundedView(
-            fill: NSColor.adaptive(light: NSColor.white.withAlphaComponent(0.76), dark: NSColor(red: 0.11, green: 0.14, blue: 0.20, alpha: 0.78)),
-            stroke: NSColor.adaptive(light: NSColor.black.withAlphaComponent(0.10), dark: NSColor.white.withAlphaComponent(0.12)),
-            radius: 36
+        let hero = RoundedView(
+            fill: NSColor.adaptive(light: NSColor.white.withAlphaComponent(0.28), dark: NSColor(red: 0.08, green: 0.10, blue: 0.16, alpha: 0.42)),
+            stroke: NSColor.adaptive(light: NSColor.white.withAlphaComponent(0.70), dark: NSColor.white.withAlphaComponent(0.13)),
+            radius: 38
         )
-        addSubview(card)
+        hero.wantsLayer = true
+        hero.layer?.shadowColor = NSColor.black.withAlphaComponent(0.18).cg
+        hero.layer?.shadowOpacity = 0.28
+        hero.layer?.shadowRadius = 30
+        hero.layer?.shadowOffset = NSSize(width: 0, height: 20)
+        addSubview(hero)
 
-        let glyph = GlyphView(text: "S", size: 78)
-        let eyebrow = makeLabel("SREON BROWSER", font: .systemFont(ofSize: 12, weight: .bold), color: NSColor.systemBlue, alignment: .center)
-        let title = makeLabel("Fast, quiet browsing.", font: .systemFont(ofSize: 58, weight: .bold), color: .labelColor, alignment: .center)
-        title.lineBreakMode = .byWordWrapping
+        let dots = NSStackView(views: [
+            makeDot(NSColor(red: 1.0, green: 0.37, blue: 0.34, alpha: 1)),
+            makeDot(NSColor(red: 1.0, green: 0.76, blue: 0.18, alpha: 1)),
+            makeDot(NSColor(red: 0.22, green: 0.79, blue: 0.30, alpha: 1))
+        ])
+        dots.translatesAutoresizingMaskIntoConstraints = false
+        dots.orientation = .horizontal
+        dots.spacing = 10
+        hero.addSubview(dots)
+
+        let glyph = GlyphView(text: "S", size: 64)
+        let eyebrow = makeLabel("SREON", font: .systemFont(ofSize: 12, weight: .heavy), color: NSColor.systemBlue, alignment: .center)
+        let title = makeLabel("Browse in glass.", font: .systemFont(ofSize: 62, weight: .bold), color: .labelColor, alignment: .center)
         title.maximumNumberOfLines = 2
-        let subtitle = makeLabel("A native macOS browser with a minimalist Sreon interface — no AI assistant, no agent panel, no distractions.", font: .systemFont(ofSize: 17, weight: .regular), color: .secondaryLabelColor, alignment: .center)
+        title.lineBreakMode = .byWordWrapping
+        let subtitle = makeLabel("A calm Zen-style sidebar browser for macOS. Minimal chrome, WebKit speed, and zero AI inside.", font: .systemFont(ofSize: 17, weight: .regular), color: .secondaryLabelColor, alignment: .center)
+        subtitle.maximumNumberOfLines = 2
         subtitle.lineBreakMode = .byWordWrapping
-        subtitle.maximumNumberOfLines = 3
 
         searchField.translatesAutoresizingMaskIntoConstraints = false
         searchField.placeholderString = "Search DuckDuckGo or enter a URL"
-        searchField.font = .systemFont(ofSize: 17)
+        searchField.font = .systemFont(ofSize: 18, weight: .medium)
         searchField.isBordered = false
         searchField.focusRingType = .none
         searchField.delegate = self
         searchField.target = self
         searchField.action = #selector(submitSearch)
         searchField.wantsLayer = true
-        searchField.layer?.cornerRadius = 28
-        searchField.layer?.backgroundColor = NSColor.adaptive(light: .white, dark: NSColor.white.withAlphaComponent(0.10)).cg
-        searchField.layer?.borderColor = NSColor.adaptive(light: NSColor.black.withAlphaComponent(0.12), dark: NSColor.white.withAlphaComponent(0.14)).cg
+        searchField.layer?.cornerRadius = 31
+        searchField.layer?.backgroundColor = NSColor.adaptive(light: NSColor.white.withAlphaComponent(0.64), dark: NSColor.white.withAlphaComponent(0.14)).cg
+        searchField.layer?.borderColor = NSColor.adaptive(light: NSColor.white.withAlphaComponent(0.88), dark: NSColor.white.withAlphaComponent(0.20)).cg
         searchField.layer?.borderWidth = 1
+        searchField.layer?.shadowColor = NSColor.systemBlue.withAlphaComponent(0.22).cg
+        searchField.layer?.shadowOpacity = 0.45
+        searchField.layer?.shadowRadius = 18
+        searchField.layer?.shadowOffset = NSSize(width: 0, height: 10)
 
-        let quickStack = NSStackView()
+        let quickStack = NSStackView(views: [
+            makeQuickButton("Apple", url: "https://www.apple.com"),
+            makeQuickButton("GitHub", url: "https://github.com"),
+            makeQuickButton("News", url: "https://news.ycombinator.com"),
+            makeQuickButton("Wiki", url: "https://wikipedia.org")
+        ])
         quickStack.translatesAutoresizingMaskIntoConstraints = false
         quickStack.orientation = .horizontal
         quickStack.alignment = .centerY
-        quickStack.distribution = .gravityAreas
         quickStack.spacing = 10
-
-        for (title, url) in [
-            ("Apple", "https://www.apple.com"),
-            ("GitHub", "https://github.com"),
-            ("Hacker News", "https://news.ycombinator.com"),
-            ("Wikipedia", "https://wikipedia.org")
-        ] {
-            let button = NSButton(title: title, target: self, action: #selector(quickLinkTapped(_:)))
-            button.identifier = NSUserInterfaceItemIdentifier(url)
-            button.isBordered = false
-            button.wantsLayer = true
-            button.layer?.cornerRadius = 16
-            button.layer?.backgroundColor = NSColor.adaptive(light: NSColor.white.withAlphaComponent(0.48), dark: NSColor.white.withAlphaComponent(0.08)).cg
-            button.contentTintColor = .labelColor
-            button.font = .systemFont(ofSize: 13, weight: .medium)
-            button.translatesAutoresizingMaskIntoConstraints = false
-            button.heightAnchor.constraint(equalToConstant: 32).isActive = true
-            quickStack.addArrangedSubview(button)
-        }
 
         let content = NSStackView(views: [glyph, eyebrow, title, subtitle, searchField, quickStack])
         content.translatesAutoresizingMaskIntoConstraints = false
         content.orientation = .vertical
         content.alignment = .centerX
-        content.spacing = 14
-        content.setCustomSpacing(8, after: eyebrow)
-        content.setCustomSpacing(18, after: subtitle)
-        card.addSubview(content)
+        content.spacing = 13
+        content.setCustomSpacing(7, after: eyebrow)
+        content.setCustomSpacing(24, after: subtitle)
+        hero.addSubview(content)
+
+        let leftCard = makeInfoCard(number: "01", title: "Sidebar tabs", detail: "Zen-like tabs live on the left, not in a top bar.")
+        let rightCard = makeInfoCard(number: "02", title: "No AI", detail: "No assistant panel, no model calls, no automation layer.")
+        let bottomCard = makeInfoCard(number: "03", title: "Native WebKit", detail: "Swift, AppKit, and WKWebView for a Mac-first build.")
+        addSubview(leftCard)
+        addSubview(rightCard)
+        addSubview(bottomCard)
 
         NSLayoutConstraint.activate([
-            card.centerXAnchor.constraint(equalTo: centerXAnchor),
-            card.centerYAnchor.constraint(equalTo: centerYAnchor, constant: -18),
-            card.widthAnchor.constraint(lessThanOrEqualToConstant: 760),
-            card.widthAnchor.constraint(greaterThanOrEqualToConstant: 520),
+            hero.centerXAnchor.constraint(equalTo: centerXAnchor),
+            hero.centerYAnchor.constraint(equalTo: centerYAnchor, constant: -16),
+            hero.widthAnchor.constraint(lessThanOrEqualToConstant: 860),
+            hero.widthAnchor.constraint(greaterThanOrEqualToConstant: 620),
+            hero.heightAnchor.constraint(equalToConstant: 430),
 
-            content.topAnchor.constraint(equalTo: card.topAnchor, constant: 42),
-            content.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -38),
-            content.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 48),
-            content.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -48),
-            searchField.widthAnchor.constraint(equalToConstant: 560),
-            searchField.heightAnchor.constraint(equalToConstant: 56),
-            subtitle.widthAnchor.constraint(lessThanOrEqualToConstant: 560),
-            title.widthAnchor.constraint(lessThanOrEqualToConstant: 650)
+            dots.leadingAnchor.constraint(equalTo: hero.leadingAnchor, constant: 24),
+            dots.topAnchor.constraint(equalTo: hero.topAnchor, constant: 20),
+
+            content.centerXAnchor.constraint(equalTo: hero.centerXAnchor),
+            content.centerYAnchor.constraint(equalTo: hero.centerYAnchor, constant: 16),
+            content.leadingAnchor.constraint(greaterThanOrEqualTo: hero.leadingAnchor, constant: 48),
+            content.trailingAnchor.constraint(lessThanOrEqualTo: hero.trailingAnchor, constant: -48),
+            title.widthAnchor.constraint(lessThanOrEqualToConstant: 700),
+            subtitle.widthAnchor.constraint(lessThanOrEqualToConstant: 610),
+            searchField.widthAnchor.constraint(equalToConstant: 610),
+            searchField.heightAnchor.constraint(equalToConstant: 62),
+
+            leftCard.trailingAnchor.constraint(equalTo: hero.leadingAnchor, constant: 70),
+            leftCard.centerYAnchor.constraint(equalTo: hero.centerYAnchor, constant: -36),
+            rightCard.leadingAnchor.constraint(equalTo: hero.trailingAnchor, constant: -70),
+            rightCard.centerYAnchor.constraint(equalTo: hero.centerYAnchor, constant: 42),
+            bottomCard.centerXAnchor.constraint(equalTo: hero.centerXAnchor),
+            bottomCard.topAnchor.constraint(equalTo: hero.bottomAnchor, constant: -28)
         ])
+    }
+
+    func focusSearch() {
+        window?.makeFirstResponder(searchField)
+        searchField.currentEditor()?.selectAll(nil)
     }
 
     @objc private func submitSearch() {
@@ -333,6 +434,7 @@ final class BrowserView: NSView, NSSearchFieldDelegate, WKNavigationDelegate, WK
     private let tabStack = NSStackView()
     private let contentView = NSView()
     private let startPage = StartPageView()
+    private let addressPalette = NSVisualEffectView()
     private let addressField = NSSearchField()
     private lazy var backButton = makeIconButton(symbol: "chevron.left", fallback: "‹", tooltip: "Back", target: self, action: #selector(back))
     private lazy var forwardButton = makeIconButton(symbol: "chevron.right", fallback: "›", tooltip: "Forward", target: self, action: #selector(forward))
@@ -355,92 +457,45 @@ final class BrowserView: NSView, NSSearchFieldDelegate, WKNavigationDelegate, WK
 
     private func setupUI() {
         wantsLayer = true
-        layer?.backgroundColor = NSColor.windowBackgroundColor.cg
-
-        chrome.translatesAutoresizingMaskIntoConstraints = false
-        chrome.material = .underWindowBackground
-        chrome.blendingMode = .withinWindow
-        chrome.state = .active
-        addSubview(chrome)
+        layer?.backgroundColor = NSColor.adaptive(light: NSColor(red: 0.78, green: 0.86, blue: 0.96, alpha: 1), dark: NSColor(red: 0.02, green: 0.03, blue: 0.06, alpha: 1)).cg
 
         contentView.translatesAutoresizingMaskIntoConstraints = false
         contentView.wantsLayer = true
+        contentView.layer?.cornerRadius = 34
+        contentView.layer?.masksToBounds = true
+        contentView.layer?.backgroundColor = NSColor.adaptive(light: NSColor.white.withAlphaComponent(0.55), dark: NSColor(red: 0.04, green: 0.05, blue: 0.08, alpha: 1)).cg
         addSubview(contentView)
 
-        let topRow = NSStackView()
-        topRow.translatesAutoresizingMaskIntoConstraints = false
-        topRow.orientation = .horizontal
-        topRow.alignment = .centerY
-        topRow.spacing = 10
-        chrome.addSubview(topRow)
+        chrome.translatesAutoresizingMaskIntoConstraints = false
+        chrome.material = .hudWindow
+        chrome.blendingMode = .withinWindow
+        chrome.state = .active
+        chrome.wantsLayer = true
+        chrome.layer?.cornerRadius = 30
+        chrome.layer?.masksToBounds = true
+        chrome.layer?.borderColor = NSColor.adaptive(light: NSColor.white.withAlphaComponent(0.62), dark: NSColor.white.withAlphaComponent(0.13)).cg
+        chrome.layer?.borderWidth = 1
+        chrome.layer?.shadowColor = NSColor.black.withAlphaComponent(0.20).cg
+        chrome.layer?.shadowOpacity = 0.24
+        chrome.layer?.shadowRadius = 24
+        chrome.layer?.shadowOffset = NSSize(width: 0, height: 16)
+        addSubview(chrome)
 
-        let brand = makeBrand()
-        tabStack.translatesAutoresizingMaskIntoConstraints = false
-        tabStack.orientation = .horizontal
-        tabStack.alignment = .centerY
-        tabStack.spacing = 7
-        tabStack.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        tabStack.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-
-        let newButton = makeIconButton(symbol: "plus", fallback: "+", tooltip: "New Tab", target: self, action: #selector(newTabFromButton))
-        topRow.addArrangedSubview(brand)
-        topRow.addArrangedSubview(tabStack)
-        topRow.addArrangedSubview(newButton)
-
-        let toolbar = NSStackView()
-        toolbar.translatesAutoresizingMaskIntoConstraints = false
-        toolbar.orientation = .horizontal
-        toolbar.alignment = .centerY
-        toolbar.spacing = 8
-        chrome.addSubview(toolbar)
-
-        let navGroup = NSStackView(views: [backButton, forwardButton, reloadButton])
-        navGroup.orientation = .horizontal
-        navGroup.alignment = .centerY
-        navGroup.spacing = 4
-
-        addressField.translatesAutoresizingMaskIntoConstraints = false
-        addressField.placeholderString = "Search or enter website"
-        addressField.font = .systemFont(ofSize: 14.5)
-        addressField.isBordered = false
-        addressField.focusRingType = .none
-        addressField.delegate = self
-        addressField.target = self
-        addressField.action = #selector(addressSubmitted)
-        addressField.wantsLayer = true
-        addressField.layer?.cornerRadius = 22
-        addressField.layer?.backgroundColor = NSColor.adaptive(light: .white, dark: NSColor.white.withAlphaComponent(0.10)).cg
-        addressField.layer?.borderColor = NSColor.adaptive(light: NSColor.black.withAlphaComponent(0.10), dark: NSColor.white.withAlphaComponent(0.13)).cg
-        addressField.layer?.borderWidth = 1
-
-        let menuButton = makeIconButton(symbol: "ellipsis", fallback: "…", tooltip: "About Sreon", target: self, action: #selector(showAbout))
-        toolbar.addArrangedSubview(navGroup)
-        toolbar.addArrangedSubview(addressField)
-        toolbar.addArrangedSubview(menuButton)
+        setupSidebar()
+        setupAddressPalette()
 
         contentView.addSubview(startPage)
 
         NSLayoutConstraint.activate([
-            chrome.topAnchor.constraint(equalTo: topAnchor),
-            chrome.leadingAnchor.constraint(equalTo: leadingAnchor),
-            chrome.trailingAnchor.constraint(equalTo: trailingAnchor),
-            chrome.heightAnchor.constraint(equalToConstant: 116),
+            chrome.topAnchor.constraint(equalTo: topAnchor, constant: 14),
+            chrome.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 14),
+            chrome.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -14),
+            chrome.widthAnchor.constraint(equalToConstant: 248),
 
-            contentView.topAnchor.constraint(equalTo: chrome.bottomAnchor),
-            contentView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            contentView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            contentView.bottomAnchor.constraint(equalTo: bottomAnchor),
-
-            topRow.topAnchor.constraint(equalTo: chrome.topAnchor, constant: 12),
-            topRow.leadingAnchor.constraint(equalTo: chrome.leadingAnchor, constant: 88),
-            topRow.trailingAnchor.constraint(equalTo: chrome.trailingAnchor, constant: -14),
-            topRow.heightAnchor.constraint(equalToConstant: 38),
-
-            toolbar.topAnchor.constraint(equalTo: topRow.bottomAnchor, constant: 10),
-            toolbar.leadingAnchor.constraint(equalTo: chrome.leadingAnchor, constant: 14),
-            toolbar.trailingAnchor.constraint(equalTo: chrome.trailingAnchor, constant: -14),
-            toolbar.heightAnchor.constraint(equalToConstant: 46),
-            addressField.heightAnchor.constraint(equalToConstant: 44),
+            contentView.topAnchor.constraint(equalTo: topAnchor, constant: 14),
+            contentView.leadingAnchor.constraint(equalTo: chrome.trailingAnchor, constant: 14),
+            contentView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -14),
+            contentView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -14),
 
             startPage.topAnchor.constraint(equalTo: contentView.topAnchor),
             startPage.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
@@ -449,26 +504,167 @@ final class BrowserView: NSView, NSSearchFieldDelegate, WKNavigationDelegate, WK
         ])
     }
 
-    private func makeBrand() -> NSView {
-        let glyph = GlyphView(text: "S", size: 24)
-        let title = makeLabel("Sreon", font: .systemFont(ofSize: 14, weight: .semibold), color: .labelColor)
-        let stack = NSStackView(views: [glyph, title])
+    private func setupSidebar() {
+        let stack = NSStackView()
         stack.translatesAutoresizingMaskIntoConstraints = false
-        stack.orientation = .horizontal
-        stack.alignment = .centerY
-        stack.spacing = 9
+        stack.orientation = .vertical
+        stack.alignment = .centerX
+        stack.spacing = 12
+        chrome.addSubview(stack)
 
-        let holder = RoundedView(
-            fill: NSColor.adaptive(light: NSColor.white.withAlphaComponent(0.42), dark: NSColor.white.withAlphaComponent(0.08)),
-            stroke: NSColor.adaptive(light: NSColor.black.withAlphaComponent(0.08), dark: NSColor.white.withAlphaComponent(0.10)),
-            radius: 17
-        )
-        holder.addSubview(stack)
+        let brand = makeSidebarBrand()
+        let searchButton = makeIconButton(symbol: "magnifyingglass", fallback: "⌘L", tooltip: "Search or enter address", target: self, action: #selector(focusAddress))
+        let plusButton = makeIconButton(symbol: "plus", fallback: "+", tooltip: "New Tab", target: self, action: #selector(newTabFromButton))
+        let homeButton = makeIconButton(symbol: "house", fallback: "⌂", tooltip: "Start Page", target: self, action: #selector(goHome))
+        let aboutButton = makeIconButton(symbol: "info.circle", fallback: "i", tooltip: "About Sreon", target: self, action: #selector(showAbout))
+
+        let navRow = NSStackView(views: [backButton, forwardButton, reloadButton])
+        navRow.translatesAutoresizingMaskIntoConstraints = false
+        navRow.orientation = .horizontal
+        navRow.alignment = .centerY
+        navRow.spacing = 6
+
+        let actionRow = NSStackView(views: [searchButton, plusButton, homeButton])
+        actionRow.translatesAutoresizingMaskIntoConstraints = false
+        actionRow.orientation = .horizontal
+        actionRow.alignment = .centerY
+        actionRow.spacing = 6
+
+        let tabsLabel = makeLabel("TABS", font: .systemFont(ofSize: 11, weight: .heavy), color: .secondaryLabelColor)
+        tabsLabel.alignment = .left
+        let tabsLabelWrap = NSView()
+        tabsLabelWrap.translatesAutoresizingMaskIntoConstraints = false
+        tabsLabelWrap.addSubview(tabsLabel)
         NSLayoutConstraint.activate([
-            holder.heightAnchor.constraint(equalToConstant: 34),
-            stack.leadingAnchor.constraint(equalTo: holder.leadingAnchor, constant: 8),
-            stack.trailingAnchor.constraint(equalTo: holder.trailingAnchor, constant: -13),
-            stack.centerYAnchor.constraint(equalTo: holder.centerYAnchor)
+            tabsLabelWrap.widthAnchor.constraint(equalToConstant: 216),
+            tabsLabel.leadingAnchor.constraint(equalTo: tabsLabelWrap.leadingAnchor, constant: 2),
+            tabsLabel.centerYAnchor.constraint(equalTo: tabsLabelWrap.centerYAnchor),
+            tabsLabelWrap.heightAnchor.constraint(equalToConstant: 20)
+        ])
+
+        tabStack.translatesAutoresizingMaskIntoConstraints = false
+        tabStack.orientation = .vertical
+        tabStack.alignment = .centerX
+        tabStack.spacing = 8
+
+        let tabScroll = NSScrollView()
+        tabScroll.translatesAutoresizingMaskIntoConstraints = false
+        tabScroll.drawsBackground = false
+        tabScroll.hasVerticalScroller = false
+        tabScroll.hasHorizontalScroller = false
+        tabScroll.borderType = .noBorder
+        tabScroll.documentView = tabStack
+        tabScroll.setContentHuggingPriority(.defaultLow, for: .vertical)
+        tabScroll.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
+
+        let footer = RoundedView(
+            fill: NSColor.adaptive(light: NSColor.white.withAlphaComponent(0.25), dark: NSColor.white.withAlphaComponent(0.07)),
+            stroke: NSColor.adaptive(light: NSColor.white.withAlphaComponent(0.48), dark: NSColor.white.withAlphaComponent(0.10)),
+            radius: 18
+        )
+        let footerText = makeLabel("No AI • Native Mac", font: .systemFont(ofSize: 12, weight: .semibold), color: .secondaryLabelColor, alignment: .center)
+        footer.addSubview(footerText)
+        NSLayoutConstraint.activate([
+            footer.widthAnchor.constraint(equalToConstant: 216),
+            footer.heightAnchor.constraint(equalToConstant: 40),
+            footerText.centerXAnchor.constraint(equalTo: footer.centerXAnchor),
+            footerText.centerYAnchor.constraint(equalTo: footer.centerYAnchor)
+        ])
+
+        stack.addArrangedSubview(brand)
+        stack.addArrangedSubview(actionRow)
+        stack.addArrangedSubview(navRow)
+        stack.setCustomSpacing(20, after: navRow)
+        stack.addArrangedSubview(tabsLabelWrap)
+        stack.addArrangedSubview(tabScroll)
+        stack.addArrangedSubview(footer)
+        stack.addArrangedSubview(aboutButton)
+
+        NSLayoutConstraint.activate([
+            stack.topAnchor.constraint(equalTo: chrome.topAnchor, constant: 54),
+            stack.leadingAnchor.constraint(equalTo: chrome.leadingAnchor, constant: 16),
+            stack.trailingAnchor.constraint(equalTo: chrome.trailingAnchor, constant: -16),
+            stack.bottomAnchor.constraint(equalTo: chrome.bottomAnchor, constant: -16),
+
+            brand.widthAnchor.constraint(equalToConstant: 216),
+            brand.heightAnchor.constraint(equalToConstant: 56),
+            tabScroll.widthAnchor.constraint(equalToConstant: 216),
+            tabStack.widthAnchor.constraint(equalTo: tabScroll.contentView.widthAnchor),
+            tabStack.topAnchor.constraint(equalTo: tabScroll.contentView.topAnchor),
+            tabStack.leadingAnchor.constraint(equalTo: tabScroll.contentView.leadingAnchor),
+            tabStack.trailingAnchor.constraint(equalTo: tabScroll.contentView.trailingAnchor)
+        ])
+    }
+
+    private func setupAddressPalette() {
+        addressPalette.translatesAutoresizingMaskIntoConstraints = false
+        addressPalette.material = .popover
+        addressPalette.blendingMode = .withinWindow
+        addressPalette.state = .active
+        addressPalette.wantsLayer = true
+        addressPalette.layer?.cornerRadius = 32
+        addressPalette.layer?.masksToBounds = true
+        addressPalette.layer?.borderColor = NSColor.adaptive(light: NSColor.white.withAlphaComponent(0.78), dark: NSColor.white.withAlphaComponent(0.18)).cg
+        addressPalette.layer?.borderWidth = 1
+        addressPalette.layer?.shadowColor = NSColor.black.withAlphaComponent(0.22).cg
+        addressPalette.layer?.shadowOpacity = 0.28
+        addressPalette.layer?.shadowRadius = 28
+        addressPalette.layer?.shadowOffset = NSSize(width: 0, height: 18)
+        addressPalette.isHidden = true
+        addSubview(addressPalette)
+
+        addressField.translatesAutoresizingMaskIntoConstraints = false
+        addressField.placeholderString = "Search or enter website"
+        addressField.font = .systemFont(ofSize: 18, weight: .medium)
+        addressField.isBordered = false
+        addressField.focusRingType = .none
+        addressField.delegate = self
+        addressField.target = self
+        addressField.action = #selector(addressSubmitted)
+        addressField.wantsLayer = true
+        addressField.layer?.cornerRadius = 24
+        addressField.layer?.backgroundColor = NSColor.clear.cg
+        addressPalette.addSubview(addressField)
+
+        NSLayoutConstraint.activate([
+            addressPalette.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            addressPalette.topAnchor.constraint(equalTo: topAnchor, constant: 58),
+            addressPalette.heightAnchor.constraint(equalToConstant: 66),
+            addressPalette.widthAnchor.constraint(lessThanOrEqualToConstant: 760),
+            addressPalette.widthAnchor.constraint(greaterThanOrEqualToConstant: 520),
+            addressPalette.widthAnchor.constraint(lessThanOrEqualTo: contentView.widthAnchor, multiplier: 0.84),
+
+            addressField.leadingAnchor.constraint(equalTo: addressPalette.leadingAnchor, constant: 18),
+            addressField.trailingAnchor.constraint(equalTo: addressPalette.trailingAnchor, constant: -18),
+            addressField.centerYAnchor.constraint(equalTo: addressPalette.centerYAnchor),
+            addressField.heightAnchor.constraint(equalToConstant: 50)
+        ])
+    }
+
+    private func makeSidebarBrand() -> NSView {
+        let holder = RoundedView(
+            fill: NSColor.adaptive(light: NSColor.white.withAlphaComponent(0.30), dark: NSColor.white.withAlphaComponent(0.08)),
+            stroke: NSColor.adaptive(light: NSColor.white.withAlphaComponent(0.54), dark: NSColor.white.withAlphaComponent(0.12)),
+            radius: 22
+        )
+        let glyph = GlyphView(text: "S", size: 34)
+        let title = makeLabel("Sreon", font: .systemFont(ofSize: 17, weight: .bold), color: .labelColor)
+        let subtitle = makeLabel("zen sidebar", font: .systemFont(ofSize: 11, weight: .medium), color: .secondaryLabelColor)
+        let labels = NSStackView(views: [title, subtitle])
+        labels.translatesAutoresizingMaskIntoConstraints = false
+        labels.orientation = .vertical
+        labels.alignment = .leading
+        labels.spacing = 0
+        let row = NSStackView(views: [glyph, labels])
+        row.translatesAutoresizingMaskIntoConstraints = false
+        row.orientation = .horizontal
+        row.alignment = .centerY
+        row.spacing = 10
+        holder.addSubview(row)
+        NSLayoutConstraint.activate([
+            row.leadingAnchor.constraint(equalTo: holder.leadingAnchor, constant: 12),
+            row.trailingAnchor.constraint(lessThanOrEqualTo: holder.trailingAnchor, constant: -12),
+            row.centerYAnchor.constraint(equalTo: holder.centerYAnchor)
         ])
         return holder
     }
@@ -481,6 +677,10 @@ final class BrowserView: NSView, NSSearchFieldDelegate, WKNavigationDelegate, WK
     private func installKeyboardMonitor() {
         keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
             guard let self, self.window?.isKeyWindow == true else { return event }
+            if event.keyCode == 53, !self.addressPalette.isHidden {
+                self.hideAddressPalette()
+                return nil
+            }
             guard event.modifierFlags.contains(.command), let key = event.charactersIgnoringModifiers?.lowercased() else { return event }
 
             switch key {
@@ -568,9 +768,14 @@ final class BrowserView: NSView, NSSearchFieldDelegate, WKNavigationDelegate, WK
             tab.webView.isHidden = i != index || tab.isStart
         }
         startPage.isHidden = !active.isStart
+        hideAddressPalette()
         renderTabs()
         updateChrome()
-        if focusIfStart { DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) { self.focusAddress() } }
+        if focusIfStart {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.10) {
+                if active.isStart { self.startPage.focusSearch() } else { self.focusAddress() }
+            }
+        }
     }
 
     private func renderTabs() {
@@ -579,12 +784,13 @@ final class BrowserView: NSView, NSSearchFieldDelegate, WKNavigationDelegate, WK
             view.removeFromSuperview()
         }
 
-        for (index, tab) in tabs.enumerated() {
+        for tab in tabs {
             let title = tab.title.isEmpty ? "New Tab" : tab.title
-            let pill = TabPill(title: title, active: index == activeIndex, onSelect: { [weak self] in
-                self?.selectTab(index)
-            }, onClose: { [weak self] in
-                guard let self else { return }
+            let pill = TabPill(title: title, active: tab === tabs[activeIndex], onSelect: { [weak self, weak tab] in
+                guard let self, let tab, let index = self.tabs.firstIndex(where: { $0.id == tab.id }) else { return }
+                self.selectTab(index)
+            }, onClose: { [weak self, weak tab] in
+                guard let self, let tab, let index = self.tabs.firstIndex(where: { $0.id == tab.id }) else { return }
                 self.activeIndex = index
                 self.closeActiveTab()
             })
@@ -595,8 +801,8 @@ final class BrowserView: NSView, NSSearchFieldDelegate, WKNavigationDelegate, WK
     private func updateChrome() {
         guard tabs.indices.contains(activeIndex) else { return }
         let tab = tabs[activeIndex]
-        if window?.firstResponder !== addressField.currentEditor() {
-            addressField.stringValue = tab.isStart ? "" : tab.url.map { displayURL($0) } ?? ""
+        if !addressPalette.isHidden, window?.firstResponder !== addressField.currentEditor() {
+            addressField.stringValue = tab.isStart ? "" : tab.url.map { $0.absoluteString } ?? ""
         }
         backButton.isEnabled = tab.webView.canGoBack
         forwardButton.isEnabled = tab.webView.canGoForward
@@ -606,6 +812,7 @@ final class BrowserView: NSView, NSSearchFieldDelegate, WKNavigationDelegate, WK
 
     @objc private func addressSubmitted() {
         navigateActive(addressField.stringValue)
+        hideAddressPalette()
     }
 
     private func navigateActive(_ raw: String) {
@@ -617,6 +824,7 @@ final class BrowserView: NSView, NSSearchFieldDelegate, WKNavigationDelegate, WK
         startPage.isHidden = true
         tab.webView.isHidden = false
         tab.webView.load(URLRequest(url: url))
+        startPage.searchField.stringValue = ""
         updateChrome()
         renderTabs()
     }
@@ -658,12 +866,31 @@ final class BrowserView: NSView, NSSearchFieldDelegate, WKNavigationDelegate, WK
         return url.absoluteString
     }
 
+    private func hideAddressPalette() {
+        addressPalette.isHidden = true
+        if window?.firstResponder === addressField.currentEditor() {
+            window?.makeFirstResponder(nil)
+        }
+    }
+
     @objc func focusAddress() {
         guard tabs.indices.contains(activeIndex) else { return }
         let tab = tabs[activeIndex]
         addressField.stringValue = tab.url?.absoluteString ?? ""
+        addressPalette.isHidden = false
         window?.makeFirstResponder(addressField)
         addressField.currentEditor()?.selectAll(nil)
+    }
+
+    @objc func goHome() {
+        guard tabs.indices.contains(activeIndex) else { return }
+        let tab = tabs[activeIndex]
+        tab.webView.stopLoading()
+        tab.isStart = true
+        tab.url = nil
+        tab.title = "New Tab"
+        startPage.searchField.stringValue = ""
+        selectTab(activeIndex, focusIfStart: true)
     }
 
     @objc func back() {
@@ -684,7 +911,7 @@ final class BrowserView: NSView, NSSearchFieldDelegate, WKNavigationDelegate, WK
     @objc func showAbout() {
         let alert = NSAlert()
         alert.messageText = "Sreon Browser"
-        alert.informativeText = "A fast native macOS browser with a minimalist Sreon UI. No AI assistant or agent features are included."
+        alert.informativeText = "A native macOS browser with a Zen-style glass sidebar, WebKit browsing, and no AI assistant or model features."
         alert.addButton(withTitle: "OK")
         alert.runModal()
     }

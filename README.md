@@ -6,8 +6,9 @@ Sreon is a minimalist, macOS-first browser built natively with **Swift + AppKit 
 
 - Native Swift/AppKit desktop app for macOS.
 - WebKit/WKWebView page engine for fast, system-integrated browsing.
-- Minimal tab strip, omnibox, back/forward/reload controls, and start page.
-- Apple-like visual design: translucent title area, rounded surfaces, SF Symbols, and system typography.
+- Zen-style left sidebar for tabs and navigation — no traditional top browser bar.
+- Floating command/address palette plus a glassmorphism start page search.
+- Apple-like visual design: translucent glass panels, rounded surfaces, SF Symbols, and system typography.
 - Keyboard shortcuts: `⌘T`, `⌘W`, `⌘L`, `⌘R`, `⌘[` and `⌘]`.
 - Ships as a macOS `.dmg` with an ad-hoc signed `.app` bundle.
 
