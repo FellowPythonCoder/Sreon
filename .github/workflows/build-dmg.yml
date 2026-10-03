@@ -11,9 +11,20 @@ jobs:
       - name: Select Xcode 16
         run: sudo xcode-select -s /Applications/Xcode_16.4.app/Contents/Developer || true
       - name: Build, test, and package
-        run: chmod +x scripts/build-dmg.sh && scripts/build-dmg.sh
+        id: compile
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          chmod +x scripts/build-dmg.sh
+          scripts/build-dmg.sh 2>&1 | tee compile.log
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: Slate-macOS
-          path: build/Slate.dmg
+          name: Slate-build
+          path: |
+            build/Slate.dmg
+            compile.log
           if-no-files-found: error
+      - name: Verify build
+        if: steps.compile.outcome != 'success'
+        run: exit 1
