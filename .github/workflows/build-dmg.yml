@@ -1,0 +1,19 @@
+name: Build Slate DMG
+on:
+  workflow_dispatch:
+  push:
+    branches: [arena/01a103be-sreon]
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode 16
+        run: sudo xcode-select -s /Applications/Xcode_16.4.app/Contents/Developer || true
+      - name: Build, test, and package
+        run: chmod +x scripts/build-dmg.sh && scripts/build-dmg.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Slate-macOS
+          path: build/Slate.dmg
+          if-no-files-found: error
