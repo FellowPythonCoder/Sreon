@@ -55,6 +55,11 @@ Sample screenshots generated directly from the Sreon visual suite:
 |:---:|:---:|
 | <img src="docs/screenshots/sreon_whiteboard.png" width="460" alt="Whiteboard"> | <img src="docs/screenshots/sreon_productivity_tools.png" width="460" alt="Productivity Tools"> |
 
+| Sreon Shield Privacy Engine | Spatial AI Workspace |
+|:---:|:---:|
+| <img src="docs/screenshots/sreon_shield_active.png" width="460" alt="Sreon Shield"> | <img src="docs/screenshots/sreon_ai_workspace.png" width="460" alt="AI Workspace"> |
+
+
 ---
 
 ## Architectural Overview

@@ -305,12 +305,148 @@ def render_productivity_tools():
     img.save(p, "PNG")
     print(f"  [✓] Rendered {p}")
 
+def render_shield_panel():
+    w, h = 1280, 800
+    img = Image.new("RGBA", (w, h), (8, 8, 12, 255))
+    draw = ImageDraw.Draw(img)
+
+    # Window Chrome & Header
+    draw.rectangle([0, 0, w, 44], fill=(12, 12, 16, 240))
+    draw.ellipse([16, 16, 28, 28], fill=(255, 95, 86))
+    draw.ellipse([36, 16, 48, 28], fill=(255, 189, 46))
+    draw.ellipse([56, 16, 68, 28], fill=(39, 201, 63))
+    draw.text((86, 14), "SREON SHIELD — ADVANCED PRIVACY & TRACKER PROTECTION", fill=(245, 245, 248))
+
+    # Floating Toolbar
+    draw.rectangle([0, 45, w, 96], fill=(14, 14, 20, 220))
+    draw.rounded_rectangle([130, 52, 980, 88], radius=18, fill=(26, 26, 36, 200), outline=(255, 107, 0, 80), width=1)
+    draw.text((150, 63), "🔒 https://developer.apple.com/documentation/webkit", fill=(240, 240, 245))
+    draw.rounded_rectangle([880, 58, 968, 82], radius=12, fill=(255, 107, 0, 48), outline=(255, 107, 0, 100))
+    draw.text((894, 63), "🛡️ 12 Blocked", fill=(255, 107, 0))
+
+    # Left Rail
+    draw.rectangle([0, 97, 58, h - 28], fill=(11, 11, 15, 240))
+    draw.rounded_rectangle([10, 150, 48, 186], radius=10, fill=(255, 107, 0, 50), outline=(255, 107, 0, 120))
+    draw.text((16, 162), "🛡️", fill=(255, 161, 54))
+
+    # Sidebar: Sreon Shield Drawer Open
+    draw.rectangle([58, 97, 420, h - 28], fill=(15, 15, 22, 245))
+    draw.line([420, 97, 420, h - 28], fill=(255, 255, 255, 16), width=1)
+    draw.text((80, 115), "SREON SHIELD STATUS", fill=(255, 107, 0))
+    draw.text((80, 135), "Hardware-accelerated content protection active", fill=(130, 130, 140))
+
+    # Shield Big Card
+    draw.rounded_rectangle([75, 170, 400, 260], radius=14, fill=(22, 22, 32, 220), outline=(255, 107, 0, 120), width=1)
+    draw.text((95, 185), "Protection Level", fill=(140, 140, 150))
+    draw.text((95, 210), "STRICT SHIELD ACTIVE", fill=(255, 161, 54))
+    draw.text((95, 235), "432 rules compiled · 0 ms latency overhead", fill=(16, 185, 129))
+
+    # Metrics
+    metrics = [
+        ("TRACKERS BLOCKED", "1,842 total", "12 on this page"),
+        ("DATA SAVED", "64.2 MB", "Est. 1.2s page load boost"),
+        ("FINGERPRINTING", "BLOCKED", "Canvas & WebGL Spoofed"),
+        ("COOKIE BANNERS", "AUTO-DISMISSED", "Clean reading enabled")
+    ]
+    for i, (m1, m2, m3) in enumerate(metrics):
+        my = 280 + i * 85
+        draw.rounded_rectangle([75, my, 400, my + 72], radius=12, fill=(20, 20, 28, 200), outline=(255, 255, 255, 16))
+        draw.text((90, my + 10), m1, fill=(120, 120, 130))
+        draw.text((90, my + 30), m2, fill=(255, 255, 255))
+        draw.text((90, my + 50), m3, fill=(255, 161, 54) if i == 0 else (140, 140, 150))
+
+    # Allowlist toggle button
+    draw.rounded_rectangle([75, 640, 400, 685], radius=10, fill=(255, 107, 0, 40), outline=(255, 107, 0, 100))
+    draw.text((120, 655), "Add Current Domain to Whitelist", fill=(255, 161, 54))
+
+    # Main Browser View (WebKit Canvas)
+    draw.rectangle([421, 97, w, h - 28], fill=(18, 18, 24, 255))
+    draw.rounded_rectangle([450, 130, w - 30, h - 60], radius=12, fill=(24, 24, 32, 200), outline=(255, 255, 255, 14))
+    draw.text((480, 160), "WebKit Documentation · Apple Developer", fill=(255, 255, 255))
+    draw.text((480, 195), "Integrating WKWebView with SPRFST Native Runtime", fill=(255, 161, 54))
+    draw.text((480, 235), "WKWebView runs modern HTML5, CSS Grid, WebGL, and ECMAScript with native JIT acceleration.", fill=(200, 200, 210))
+    draw.text((480, 265), "SPRFST Bridge handles request blocking and content rules prior to network resolution.", fill=(160, 160, 170))
+
+    # Status Bar
+    draw.rectangle([0, h - 28, w, h], fill=(10, 10, 14, 250))
+    draw.text((16, h - 20), "Sreon Shield 1.0 · 0 ms inspection · Strict Protection Mode Active", fill=(16, 185, 129))
+
+    p = os.path.join(OUT_DIR, "sreon_shield_active.png")
+    img.save(p, "PNG")
+    print(f"  [✓] Rendered {p}")
+
+def render_ai_workspace():
+    w, h = 1280, 800
+    img = Image.new("RGBA", (w, h), (8, 8, 12, 255))
+    draw = ImageDraw.Draw(img)
+
+    # Window Chrome & Header
+    draw.rectangle([0, 0, w, 44], fill=(12, 12, 16, 240))
+    draw.ellipse([16, 16, 28, 28], fill=(255, 95, 86))
+    draw.ellipse([36, 16, 48, 28], fill=(255, 189, 46))
+    draw.ellipse([56, 16, 68, 28], fill=(39, 201, 63))
+    draw.text((86, 14), "SREON AI WORKSPACE — SPATIAL INTELLIGENCE", fill=(245, 245, 248))
+
+    # Toolbar
+    draw.rectangle([0, 45, w, 96], fill=(14, 14, 20, 220))
+    draw.rounded_rectangle([130, 52, 980, 88], radius=18, fill=(26, 26, 36, 200), outline=(255, 107, 0, 80), width=1)
+    draw.text((150, 63), "🔒 https://github.com/FellowPythonCoder/Sreon", fill=(240, 240, 245))
+
+    # Left Rail
+    draw.rectangle([0, 97, 58, h - 28], fill=(11, 11, 15, 240))
+    draw.rounded_rectangle([10, 105, 48, 141], radius=10, fill=(255, 107, 0, 50), outline=(255, 107, 0, 120))
+    draw.text((16, 117), "✨", fill=(255, 161, 54))
+
+    # AI Drawer
+    draw.rectangle([58, 97, 440, h - 28], fill=(15, 15, 22, 245))
+    draw.line([440, 97, 440, h - 28], fill=(255, 255, 255, 16), width=1)
+    draw.text((80, 115), "SPRFST AI WORKSPACE", fill=(255, 107, 0))
+    draw.text((80, 135), "Context-aware browsing & code generation", fill=(130, 130, 140))
+
+    # Prompt action pills
+    pills = ["Explain Page", "Extract Code", "Audit Privacy", "Summarize"]
+    for i, pl in enumerate(pills):
+        px = 75 + (i % 2) * 175
+        py = 165 + (i // 2) * 42
+        draw.rounded_rectangle([px, py, px + 165, py + 34], radius=8, fill=(26, 26, 36, 200), outline=(255, 107, 0, 70))
+        draw.text((px + 12, py + 9), pl, fill=(220, 220, 230))
+
+    # Chat message 1 (User)
+    draw.rounded_rectangle([75, 260, 420, 310], radius=10, fill=(30, 30, 42, 220), outline=(255, 107, 0, 80))
+    draw.text((90, 275), "How does Sreon implement WKWebView integration?", fill=(245, 245, 250))
+
+    # Chat message 2 (Assistant)
+    draw.rounded_rectangle([75, 325, 420, 520], radius=10, fill=(22, 22, 30, 220), outline=(255, 255, 255, 20))
+    draw.text((90, 340), "Sreon uses a dual-engine architecture:", fill=(255, 161, 54))
+    draw.text((90, 370), "1. BrowserViewController hosts WKWebView\n   for full modern HTML5, CSS3, & WebGL.\n2. SreonEngineBridge intercepts messages\n   and communicates with SPRFST VM.\n3. Content blockers run at native Swift speed\n   with zero rendering overhead.", fill=(200, 200, 210))
+
+    # AI input box
+    draw.rounded_rectangle([75, 630, 420, 685], radius=14, fill=(12, 12, 16, 255), outline=(255, 107, 0, 100))
+    draw.text((90, 650), "Ask Sreon AI anything about this page...", fill=(120, 120, 130))
+
+    # Main view
+    draw.rectangle([441, 97, w, h - 28], fill=(18, 18, 24, 255))
+    draw.rounded_rectangle([470, 130, w - 30, h - 60], radius=12, fill=(24, 24, 32, 200), outline=(255, 255, 255, 14))
+    draw.text((500, 160), "FellowPythonCoder / Sreon", fill=(255, 255, 255))
+    draw.text((500, 195), "The Next Generation of Browsing · Powered by SPRFST Language", fill=(255, 161, 54))
+    draw.text((500, 235), "Full codebase with built-in compiler, IDE, infinite whiteboard, and 21 tools.", fill=(200, 200, 210))
+
+    # Status Bar
+    draw.rectangle([0, h - 28, w, h], fill=(10, 10, 14, 250))
+    draw.text((16, h - 20), "Sreon AI Assistant · Connected to SPRFST Neural Engine · 8ms response", fill=(16, 185, 129))
+
+    p = os.path.join(OUT_DIR, "sreon_ai_workspace.png")
+    img.save(p, "PNG")
+    print(f"  [✓] Rendered {p}")
+
 def main():
     print("Rendering high-resolution Sreon preview photos...")
     render_start_page()
     render_studio_ide()
     render_whiteboard()
     render_productivity_tools()
+    render_shield_panel()
+    render_ai_workspace()
     print("All sample photos generated!")
 
 if __name__ == "__main__":
