@@ -1,0 +1,198 @@
+~~ =====================================================================
+~~  Sreon Shield — Ad & Tracker Blocking Engine
+~~  Powered by SPRFST Language
+~~
+~~  Blocks trackers, ads, malicious domains, and generates native
+~~  WebKit Content Rule Lists (WKContentRuleList) for hardware-accelerated
+~~  browsing in WKWebView.
+~~ =====================================================================
+module shield
+
+use std.fs
+use std.io
+use std.json
+use uri
+
+pub object Rule {
+    pattern: Text = ""
+    kind: Text = "part"        ~~ part, start, end, host
+    third: Bool = false
+    allow: Bool = false
+}
+
+pub object Shield {
+    block_hosts: Map<Text, Bool> = [:]
+    third_hosts: Map<Text, Bool> = [:]
+    allow_hosts: Map<Text, Bool> = [:]
+    rules: [Rule] = []
+    hide_all: [Text] = []
+    hide_site: Map<Text, [Text]> = [:]
+    enabled: Bool = true
+    loaded: Int = 0
+    blocked: Int = 0
+    passed: Int = 0
+    hidden: Int = 0
+
+    fn add(self, raw: Text) {
+        var line = raw.trim()
+        if line == "" or line.starts_with("~~") or line.starts_with("!") or line.starts_with("#!") {
+            give
+        }
+
+        let cosmetic = line.index_of("##")
+        if cosmetic >= 0 {
+            let site = line.slice(0, cosmetic).trim().lower()
+            let selector = line.slice(cosmetic + 2, line.len()).trim()
+            if selector == "" { give }
+            if site == "" {
+                self.hide_all.push(selector)
+            } else {
+                var list = self.hide_site.get(site) ?? []
+                list.push(selector)
+                self.hide_site.set(site, list)
+            }
+            self.loaded = self.loaded + 1
+            give
+        }
+
+        var allow = false
+        if line.starts_with("@@") {
+            allow = true
+            line = line.slice(2, line.len())
+        }
+
+        var third = false
+        let opt_idx = line.index_of("$")
+        if opt_idx >= 0 {
+            let opt = line.slice(opt_idx + 1, line.len()).trim()
+            if opt.contains("third-party") { third = true }
+            line = line.slice(0, opt_idx)
+        }
+
+        if line.starts_with("||") and line.ends_with("^") {
+            let host = line.slice(2, line.len() - 1).lower()
+            if allow {
+                self.allow_hosts.set(host, true)
+            } else if third {
+                self.third_hosts.set(host, true)
+            } else {
+                self.block_hosts.set(host, true)
+            }
+            self.loaded = self.loaded + 1
+            give
+        }
+
+        var kind = "part"
+        var pattern = line
+        if pattern.starts_with("|") {
+            kind = "start"
+            pattern = pattern.slice(1, pattern.len())
+        } else if pattern.ends_with("|") {
+            kind = "end"
+            pattern = pattern.slice(0, pattern.len() - 1)
+        }
+
+        self.rules.push(Rule { pattern: pattern, kind: kind, third: third, allow: allow })
+        self.loaded = self.loaded + 1
+    }
+
+    fn check_host(self, host: Text) -> Text {
+        var h = host.lower()
+        loop {
+            if self.allow_hosts.has(h) { give "allow" }
+            if self.block_hosts.has(h) { give "block" }
+            if self.third_hosts.has(h) { give "third" }
+            let dot = h.index_of(".")
+            if dot < 0 { break }
+            h = h.slice(dot + 1, h.len())
+        }
+        give "none"
+    }
+
+    fn check(self, url: uri.Url, page_host: Text) -> Text {
+        if not self.enabled or url.is_internal() {
+            self.passed = self.passed + 1
+            give "allow"
+        }
+
+        let is_third = page_host != "" and url.host != page_host and not url.host.ends_with("." + page_host)
+        let decision = self.check_host(url.host)
+        if decision == "allow" { self.passed = self.passed + 1; give "allow" }
+        if decision == "block" { self.blocked = self.blocked + 1; give "block" }
+        if decision == "third" and is_third { self.blocked = self.blocked + 1; give "block" }
+
+        let full = url.full()
+        for r in self.rules {
+            var matched = false
+            if r.kind == "part" and full.contains(r.pattern) { matched = true }
+            else if r.kind == "start" and full.starts_with(r.pattern) { matched = true }
+            else if r.kind == "end" and full.ends_with(r.pattern) { matched = true }
+
+            if matched {
+                if r.third and not is_third { skip }
+                if r.allow { self.passed = self.passed + 1; give "allow" }
+                self.blocked = self.blocked + 1
+                give "block"
+            }
+        }
+
+        self.passed = self.passed + 1
+        give "allow"
+    }
+
+    ~~ Export rule set into WebKit Content Rule List JSON string
+    fn to_webkit_json(self) -> Text {
+        var rules_list: [Any] = []
+
+        ~~ 1. Block hosts
+        for host in self.block_hosts.keys() {
+            let regex = ".*" + escape_regex(host) + ".*"
+            rules_list.push([
+                "trigger": [
+                    "url-filter": regex,
+                    "load-type": ["third-party", "first-party"]
+                ],
+                "action": [ "type": "block" ]
+            ])
+        }
+
+        ~~ 2. Third-party tracker hosts
+        for host in self.third_hosts.keys() {
+            let regex = ".*" + escape_regex(host) + ".*"
+            rules_list.push([
+                "trigger": [
+                    "url-filter": regex,
+                    "load-type": ["third-party"]
+                ],
+                "action": [ "type": "block" ]
+            ])
+        }
+
+        ~~ 3. Cosmetic element hiding
+        if self.hide_all.len() > 0 {
+            let sel = self.hide_all.join(", ")
+            rules_list.push([
+                "trigger": [ "url-filter": ".*" ],
+                "action": [
+                    "type": "css-display-none",
+                    "selector": sel
+                ]
+            ])
+        }
+
+        give json.write(rules_list)
+    }
+}
+
+fn escape_regex(s: Text) -> Text {
+    give s.replace(".", "\\.").replace("-", "\\-").replace("^", "")
+}
+
+pub fn from_file(path: Text) -> Shield {
+    var s = Shield { }
+    let content = fs.read(path) ?? ""
+    for line in content.split("\n") {
+        s.add(line)
+    }
+    give s
+}

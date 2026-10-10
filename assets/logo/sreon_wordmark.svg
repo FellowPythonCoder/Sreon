@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 160" width="680" height="160">
+  <defs>
+    <linearGradient id="wmOrange" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFA834" />
+      <stop offset="50%" stop-color="#FF6B00" />
+      <stop offset="100%" stop-color="#E8590C" />
+    </linearGradient>
+    <linearGradient id="wmText" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#E4E4E8" />
+    </linearGradient>
+  </defs>
+
+  <!-- Left Icon Emblem Group -->
+  <g transform="translate(16, 16) scale(0.25)">
+    <rect x="0" y="0" width="512" height="512" rx="112" fill="#0B0B0E" stroke="#FF6B00" stroke-width="4" stroke-opacity="0.4" />
+    <circle cx="256" cy="256" r="172" fill="none" stroke="#FF6B00" stroke-width="6" stroke-opacity="0.3" stroke-dasharray="24 16" />
+    <path d="M 368 124 C 330 94, 276 88, 224 104 C 172 120, 140 162, 146 212 C 150 244, 178 266, 214 278 L 298 306 C 330 316, 348 332, 344 354 C 338 382, 308 404, 268 406 C 220 408, 180 388, 154 354"
+          fill="none" stroke="url(#wmOrange)" stroke-width="48" stroke-linecap="round" stroke-linejoin="round" />
+    <circle cx="256" cy="279" r="12" fill="#FFFFFF" />
+  </g>
+
+  <!-- Product Name: SREON -->
+  <text x="172" y="86" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif"
+        font-size="64" font-weight="800" letter-spacing="4" fill="url(#wmText)">SREON</text>
+
+  <!-- Orange Pulse Accent Dot -->
+  <circle cx="438" cy="74" r="6" fill="#FF6B00" />
+
+  <!-- Tagline: Powered by SPRFST Language -->
+  <text x="174" y="118" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', monospace"
+        font-size="14" font-weight="600" letter-spacing="3" fill="#FFA136" text-transform="uppercase">Powered by SPRFST Language</text>
+</svg>

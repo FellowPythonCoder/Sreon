@@ -1,0 +1,36 @@
+name: Sreon macOS Build & Release
+
+on:
+  push:
+    branches: [ "main", "arena/*" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Build SPRFST compiler & test toolchain
+        run: |
+          make -j4
+          make test
+          make sreon-test
+
+      - name: Build Sreon Application Bundle (.app)
+        run: |
+          ./tools/build_sreon_app.sh
+
+      - name: Build Sreon Disk Image (.dmg)
+        run: |
+          ./tools/make_sreon_dmg.sh
+
+      - name: Upload Sreon Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Sreon-macOS-Release
+          path: |
+            dist/Sreon.dmg
+            dist/Sreon.app

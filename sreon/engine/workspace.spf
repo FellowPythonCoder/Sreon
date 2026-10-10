@@ -1,0 +1,97 @@
+~~ =====================================================================
+~~  Sreon Workspace Manager
+~~  Powered by SPRFST Language
+~~
+~~  Isolated browsing environments: Work, Research, Dev, Personal.
+~~  Each maintains its own tab list, session state, and history.
+~~ =====================================================================
+module workspace
+
+use std.json
+use std.fs
+
+pub object TabState {
+    id: Text = ""
+    url: Text = "sreon://start"
+    title: Text = "New Tab"
+    pinned: Bool = false
+    group: Text = ""
+}
+
+pub object Workspace {
+    id: Text = "general"
+    name: Text = "General"
+    icon: Text = "globe"
+    color: Text = "#FF6B00"
+    tabs: [TabState] = []
+    active_tab: Int = 0
+}
+
+pub object WorkspaceManager {
+    spaces: [Workspace] = []
+    active_index: Int = 0
+
+    fn init_defaults(self) {
+        if self.spaces.len() > 0 { give }
+        var w1 = Workspace { id: "general", name: "General", icon: "globe", color: "#FF6B00" }
+        w1.tabs.push(TabState { id: "tab-1", url: "sreon://start", title: "Sreon Start" })
+        
+        var w2 = Workspace { id: "dev", name: "Developer", icon: "code", color: "#FFA136" }
+        w2.tabs.push(TabState { id: "tab-2", url: "sreon://studio", title: "Sreon Studio" })
+
+        var w3 = Workspace { id: "research", name: "Research", icon: "book-open", color: "#3B82F6" }
+        w3.tabs.push(TabState { id: "tab-3", url: "sreon://whiteboard", title: "Whiteboard" })
+
+        var w4 = Workspace { id: "personal", name: "Personal", icon: "user", color: "#10B981" }
+        w4.tabs.push(TabState { id: "tab-4", url: "sreon://start", title: "Start" })
+
+        self.spaces.push(w1)
+        self.spaces.push(w2)
+        self.spaces.push(w3)
+        self.spaces.push(w4)
+        self.active_index = 0
+    }
+
+    fn current(self) -> Workspace {
+        if self.spaces.len() == 0 { self.init_defaults() }
+        let idx = if self.active_index < self.spaces.len() { self.active_index } else { 0 }
+        give self.spaces[idx]
+    }
+
+    fn switch_to(self, id: Text) -> Bool {
+        var i = 0
+        while i < self.spaces.len() {
+            if self.spaces[i].id == id {
+                self.active_index = i
+                give true
+            }
+            i = i + 1
+        }
+        give false
+    }
+
+    fn to_json(self) -> Text {
+        var list: [Any] = []
+        for s in self.spaces {
+            var tabs_json: [Any] = []
+            for t in s.tabs {
+                tabs_json.push([
+                    "id": t.id,
+                    "url": t.url,
+                    "title": t.title,
+                    "pinned": t.pinned,
+                    "group": t.group
+                ])
+            }
+            list.push([
+                "id": s.id,
+                "name": s.name,
+                "icon": s.icon,
+                "color": s.color,
+                "active_tab": s.active_tab,
+                "tabs": tabs_json
+            ])
+        }
+        give json.write(["active": self.active_index, "spaces": list])
+    }
+}
