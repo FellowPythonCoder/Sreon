@@ -1,0 +1,85 @@
+~~ =====================================================================
+~~  Sreon Reading Vault
+~~  Powered by SPRFST Language
+~~
+~~  Saved articles, reading progress, word counts, highlights,
+~~  and offline export.
+~~ =====================================================================
+module vault
+
+use std.json
+use std.fs
+use std.time
+
+pub object VaultItem {
+    id: Text = ""
+    title: Text = ""
+    url: Text = ""
+    domain: Text = ""
+    excerpt: Text = ""
+    word_count: Int = 0
+    read_progress: Int = 0    ~~ 0 to 100%
+    saved_at: Num = 0.0
+    is_favorite: Bool = false
+    tags: [Text] = []
+}
+
+pub object ReadingVault {
+    articles: [VaultItem] = []
+
+    fn init_defaults(self) {
+        if self.articles.len() > 0 { give }
+        self.save("SPRFST Language: Fast By Design", "sreon://guidebook", "sreon.ai",
+                  "A fast, modern compiled language with its own compiler, register VM, and stdlib.", 1240)
+        self.save("Comet & The Next Generation of Spatial Browsing", "https://perplexity.ai", "perplexity.ai",
+                  "How modern AI and deep glassmorphism are transforming information retrieval.", 860)
+        self.save("Apple Glassmorphism Design Guidelines", "https://developer.apple.com/design", "developer.apple.com",
+                  "Layered materials, vibrancy, translucent depth and typography in macOS.", 1450)
+    }
+
+    fn save(self, title: Text, url: Text, domain: Text, excerpt: Text, words: Int) -> VaultItem {
+        let item = VaultItem {
+            id: "vault-" + time.now().to_text() + "-" + self.articles.len().to_text(),
+            title: title,
+            url: url,
+            domain: domain,
+            excerpt: excerpt,
+            word_count: words,
+            read_progress: 0,
+            saved_at: time.now(),
+            is_favorite: false,
+            tags: ["reading"]
+        }
+        self.articles.push(item)
+        give item
+    }
+
+    fn update_progress(self, id: Text, progress: Int) -> Bool {
+        for a in self.articles {
+            if a.id == id {
+                a.read_progress = if progress > 100 { 100 } else if progress < 0 { 0 } else { progress }
+                give true
+            }
+        }
+        give false
+    }
+
+    fn to_json(self) -> Text {
+        var list: [Any] = []
+        for a in self.articles {
+            list.push([
+                "id": a.id,
+                "title": a.title,
+                "url": a.url,
+                "domain": a.domain,
+                "excerpt": a.excerpt,
+                "word_count": a.word_count,
+                "read_progress": a.read_progress,
+                "saved_at": a.saved_at,
+                "is_favorite": a.is_favorite,
+                "tags": a.tags
+            ])
+        }
+        give json.write(list)
+    }
+}

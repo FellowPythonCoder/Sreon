@@ -1,0 +1,59 @@
+~~ Builds Sreon's .icns file out of PNG assets.
+~~
+~~ An .icns file is simple: the magic "icns", the total length as a
+~~ big-endian 32-bit number, then one record per image: type, length,
+~~ and raw PNG bytes. Writing it in SPRFST means the build needs no iconutil.
+use std.io
+use std.fs
+use std.math
+use std.sys
+use std.path
+
+fn be32(n: Int) -> [Int] {
+    give [math.floor(n / 16777216) % 256,
+          math.floor(n / 65536) % 256,
+          math.floor(n / 256) % 256,
+          n % 256]
+}
+
+fn record(kind: Text, png: [Int]) -> [Int] {
+    var out: [Int] = []
+    for b in kind.bytes() { out.push(b) }
+    for b in be32(png.len() + 8) { out.push(b) }
+    for b in png { out.push(b) }
+    give out
+}
+
+fn main() {
+    let args = sys.args()
+    let out = args.first() ?? "dist/Sreon.icns"
+
+    let kinds = ["icp4", "icp5", "ic12", "ic07", "ic08", "ic09", "ic10"]
+    let sizes = [16, 32, 64, 128, 256, 512, 1024]
+
+    var body: [Int] = []
+    var used = 0
+    for i in 0..kinds.len() {
+        let file = "assets/logo/sreon/sreon-{sizes[i]}.png"
+        if fs.exists(file) {
+            let png = fs.read_bytes(file) ?? []
+            for b in record(kinds[i], png) { body.push(b) }
+            used = used + 1
+        }
+    }
+
+    var icns: [Int] = []
+    for b in "icns".bytes() { icns.push(b) }
+    for b in be32(body.len() + 8) { icns.push(b) }
+    for b in body { icns.push(b) }
+
+    let folder = path.dirname(out)
+    if folder != "" and not fs.exists(folder) { fs.mkdir(folder) }
+
+    if fs.write_bytes(out, icns) {
+        io.say("wrote {out} — {used} images, {math.floor(icns.len() / 1024)} KB")
+    } else {
+        io.warn("could not write {out}")
+        sys.exit(1)
+    }
+}

@@ -1,0 +1,230 @@
+~~ =====================================================================
+~~  Sreon Engine — Core Service Daemon
+~~  Powered by SPRFST Language
+~~
+~~  Answers JSON-RPC commands from the native macOS shell (Swift)
+~~  and the frontend UI.
+~~ =====================================================================
+use std.io
+use std.sys
+use std.json
+use std.fs
+use std.path
+use std.time
+use uri
+use shield
+use workspace
+use bookmarks
+use vault
+use notes
+
+pub object SreonEngine {
+    guard: shield.Shield = shield.Shield { }
+    spaces: workspace.WorkspaceManager = workspace.WorkspaceManager { }
+    bmarks: bookmarks.BookmarkStore = bookmarks.BookmarkStore { }
+    vstore: vault.ReadingVault = vault.ReadingVault { }
+    nstore: notes.NotesManager = notes.NotesManager { }
+
+    fn init(self, rules_file: Text) {
+        if rules_file != "" and fs.exists(rules_file) {
+            self.guard = shield.from_file(rules_file)
+        }
+        self.spaces.init_defaults()
+        self.bmarks.init_defaults()
+        self.vstore.init_defaults()
+        self.nstore.init_defaults()
+    }
+
+    fn handle(self, request: Map<Text, Any>) -> Map<Text, Any> {
+        var cmd_val = request.get("cmd")
+        if cmd_val == nil { cmd_val = request.get("do") }
+        let cmd = to_text(cmd_val ?? "")
+
+        if cmd == "ping" or cmd == "status" {
+            give [
+                "ok": true,
+                "engine": "sreon",
+                "version": "1.0.0",
+                "powered_by": "SPRFST Language",
+                "rules_loaded": self.guard.loaded,
+                "blocked": self.guard.blocked,
+                "passed": self.guard.passed
+            ]
+        }
+
+        if cmd == "tidy_url" {
+            let input = to_text(request.get("url") ?? "")
+            let search_base = to_text(request.get("search_engine") ?? "")
+            let tidied = uri.tidy(input, search_base)
+            give ["ok": true, "url": tidied, "is_search": uri.is_search(input)]
+        }
+
+        if cmd == "shield_check" {
+            let u_raw = to_text(request.get("url") ?? "")
+            let page_host = to_text(request.get("page_host") ?? "")
+            let u = uri.parse(u_raw)
+            let decision = self.guard.check(u, page_host)
+            give [
+                "ok": true,
+                "decision": decision,
+                "blocked_total": self.guard.blocked,
+                "passed_total": self.guard.passed
+            ]
+        }
+
+        if cmd == "shield_stats" {
+            give [
+                "ok": true,
+                "enabled": self.guard.enabled,
+                "loaded_rules": self.guard.loaded,
+                "blocked_count": self.guard.blocked,
+                "passed_count": self.guard.passed,
+                "hidden_elements": self.guard.hidden
+            ]
+        }
+
+        if cmd == "shield_webkit" {
+            give [
+                "ok": true,
+                "rules_json": self.guard.to_webkit_json()
+            ]
+        }
+
+        if cmd == "bookmarks_get" {
+            give ["ok": true, "bookmarks": self.bmarks.items]
+        }
+
+        if cmd == "bookmarks_add" {
+            let title = to_text(request.get("title") ?? "")
+            let url = to_text(request.get("url") ?? "")
+            let folder = to_text(request.get("folder") ?? "Favorites")
+            let b = self.bmarks.add(title, url, folder, [])
+            give ["ok": true, "bookmark": b]
+        }
+
+        if cmd == "bookmarks_remove" {
+            let id = to_text(request.get("id") ?? "")
+            let res = self.bmarks.remove(id)
+            give ["ok": res]
+        }
+
+        if cmd == "vault_get" {
+            give ["ok": true, "articles": self.vstore.articles]
+        }
+
+        if cmd == "vault_save" {
+            let title = to_text(request.get("title") ?? "")
+            let url = to_text(request.get("url") ?? "")
+            let domain = to_text(request.get("domain") ?? "")
+            let excerpt = to_text(request.get("excerpt") ?? "")
+            let words = to_int(to_text(request.get("words") ?? "0").to_num() ?? 0.0)
+            let item = self.vstore.save(title, url, domain, excerpt, words)
+            give ["ok": true, "item": item]
+        }
+
+        if cmd == "notes_get" {
+            let url = to_text(request.get("url") ?? "")
+            let domain = to_text(request.get("domain") ?? "")
+            let note = self.nstore.get_for_url(url, domain)
+            give ["ok": true, "note": note]
+        }
+
+        if cmd == "notes_save" {
+            let url = to_text(request.get("url") ?? "")
+            let domain = to_text(request.get("domain") ?? "")
+            let title = to_text(request.get("title") ?? "")
+            let content = to_text(request.get("content") ?? "")
+            let note = self.nstore.set_note(url, domain, title, content)
+            give ["ok": true, "note": note]
+        }
+
+        if cmd == "workspaces_get" {
+            give ["ok": true, "spaces": self.spaces.spaces, "active": self.spaces.active_index]
+        }
+
+        if cmd == "workspaces_switch" {
+            let id = to_text(request.get("id") ?? "")
+            let res = self.spaces.switch_to(id)
+            give ["ok": res, "active": self.spaces.active_index]
+        }
+
+        if cmd == "sprfst_run" {
+            let code = to_text(request.get("code") ?? "")
+            let tmp = path.join("/tmp", "sreon_run_" + time.now().to_text() + ".spf")
+            fs.write(tmp, code)
+            let t0 = time.now()
+            let out = sys.run("./build/bin/sprfst run " + tmp + " 2>&1")
+            let elapsed = time.now() - t0
+            fs.remove(tmp)
+            give ["ok": true, "output": out, "ms": elapsed]
+        }
+
+        if cmd == "sprfst_check" {
+            let code = to_text(request.get("code") ?? "")
+            let tmp = path.join("/tmp", "sreon_chk_" + time.now().to_text() + ".spf")
+            fs.write(tmp, code)
+            let out = sys.run("./build/bin/sprfst check " + tmp + " 2>&1")
+            fs.remove(tmp)
+            give ["ok": true, "diagnostics": out]
+        }
+
+        give ["ok": false, "error": "unknown command: " + cmd]
+    }
+}
+
+fn find_rules() -> Text {
+    let home = sys.env("SREON_ENGINE_HOME") ?? sys.env("SPRFST_BROWSER_HOME") ?? ""
+    var tries: [Text] = []
+    if home != "" { tries.push(path.join(home, "rules/shield.rules")) }
+    tries.push("sreon/engine/rules/shield.rules")
+    tries.push("rules/shield.rules")
+    tries.push("browser/rules/shield.rules")
+    for cand in tries {
+        if fs.exists(cand) { give cand }
+    }
+    give ""
+}
+
+fn main() {
+    var engine = SreonEngine { }
+    engine.init(find_rules())
+
+    let args = sys.args()
+    if args.contains("--version") {
+        io.say("Sreon Engine 1.0.0 — Powered by SPRFST Language")
+        give
+    }
+
+    if args.contains("--help") {
+        io.say("Sreon Engine Daemon")
+        io.say("  sprfst run sreon/engine/service.spf             start line-delimited JSON-RPC")
+        io.say("  sprfst run sreon/engine/service.spf --version   show version")
+        give
+    }
+
+    io.say(json.write([
+        "ok": true,
+        "service": "sreon-engine",
+        "version": "1.0.0",
+        "tagline": "Powered by SPRFST Language",
+        "rules_loaded": engine.guard.loaded
+    ]))
+    io.flush()
+
+    loop {
+        let line = io.read_line()
+        if line == nil { break }
+        let text = (line ?? "").trim()
+        if text == "" { skip }
+        let parsed = json.parse(text)
+        if parsed == nil {
+            io.say(json.write(["ok": false, "error": "invalid JSON"]))
+            io.flush()
+            skip
+        }
+        let request: Map<Text, Any> = parsed ?? [:]
+        let resp = engine.handle(request)
+        io.say(json.write(resp))
+        io.flush()
+    }
+}

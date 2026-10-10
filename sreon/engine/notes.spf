@@ -1,0 +1,76 @@
+~~ =====================================================================
+~~  Sreon Page Notes Manager
+~~  Powered by SPRFST Language
+~~
+~~  Contextual notes tied to specific web addresses or domains.
+~~ =====================================================================
+module notes
+
+use std.json
+use std.time
+
+pub object Note {
+    id: Text = ""
+    url: Text = ""
+    domain: Text = ""
+    title: Text = ""
+    content: Text = ""
+    updated_at: Num = 0.0
+}
+
+pub object NotesManager {
+    entries: [Note] = []
+
+    fn init_defaults(self) {
+        if self.entries.len() > 0 { give }
+        self.set_note("sreon://studio", "sreon.ai", "Sreon Studio Tips",
+                      "# SPRFST Development\n- Press ⌘Enter to run current file\n- Check std.draw for graphics\n- Stdlib in std/")
+        self.set_note("https://github.com", "github.com", "GitHub Quick Links",
+                      "- FellowPythonCoder/Sreon repository\n- Check pull requests and releases")
+    }
+
+    fn get_for_url(self, url: Text, domain: Text) -> Note? {
+        for n in self.entries {
+            if n.url == url or (domain != "" and n.domain == domain) {
+                give n
+            }
+        }
+        give nil
+    }
+
+    fn set_note(self, url: Text, domain: Text, title: Text, content: Text) -> Note {
+        for n in self.entries {
+            if n.url == url {
+                n.title = title
+                n.content = content
+                n.updated_at = time.now()
+                give n
+            }
+        }
+        let fresh = Note {
+            id: "note-" + time.now().to_text() + "-" + self.entries.len().to_text(),
+            url: url,
+            domain: domain,
+            title: title,
+            content: content,
+            updated_at: time.now()
+        }
+        self.entries.push(fresh)
+        give fresh
+    }
+
+    fn to_json(self) -> Text {
+        var list: [Any] = []
+        for n in self.entries {
+            list.push([
+                "id": n.id,
+                "url": n.url,
+                "domain": n.domain,
+                "title": n.title,
+                "content": n.content,
+                "updated_at": n.updated_at
+            ])
+        }
+        give json.write(list)
+    }
+}

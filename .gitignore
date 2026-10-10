@@ -1,0 +1,10 @@
+build/
+*.o
+*.spb
+packages/
+.DS_Store
+dist/*
+!dist/*.dmg
+!dist/*.icns
+
+*.forge

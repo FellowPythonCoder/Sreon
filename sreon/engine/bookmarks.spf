@@ -1,0 +1,87 @@
+~~ =====================================================================
+~~  Sreon Smart Bookmarks Manager
+~~  Powered by SPRFST Language
+~~
+~~  Folders, tags, search, and persistent storage.
+~~ =====================================================================
+module bookmarks
+
+use std.json
+use std.fs
+use std.time
+
+pub object Bookmark {
+    id: Text = ""
+    title: Text = ""
+    url: Text = ""
+    folder: Text = "Favorites"
+    tags: [Text] = []
+    created_at: Num = 0.0
+}
+
+pub object BookmarkStore {
+    items: [Bookmark] = []
+
+    fn init_defaults(self) {
+        if self.items.len() > 0 { give }
+        self.add("Sreon Start Page", "sreon://start", "Favorites", ["sreon", "browser"])
+        self.add("Sreon Studio IDE", "sreon://studio", "Developer", ["ide", "sprfst", "code"])
+        self.add("Interactive Whiteboard", "sreon://whiteboard", "Productivity", ["canvas", "draw", "notes"])
+        self.add("Productivity Tools Suite", "sreon://tools", "Productivity", ["calculator", "converter", "regex"])
+        self.add("SPRFST Language Docs", "sreon://guidebook", "Developer", ["docs", "guidebook", "sprfst"])
+        self.add("GitHub", "https://github.com", "Favorites", ["git", "code", "open-source"])
+        self.add("Apple Developer", "https://developer.apple.com", "Developer", ["macos", "swift", "apple"])
+        self.add("Hacker News", "https://news.ycombinator.com", "Favorites", ["tech", "news"])
+    }
+
+    fn add(self, title: Text, url: Text, folder: Text, tags: [Text]) -> Bookmark {
+        let b = Bookmark {
+            id: "bm-" + time.now().to_text() + "-" + self.items.len().to_text(),
+            title: title,
+            url: url,
+            folder: if folder != "" { folder } else { "Favorites" },
+            tags: tags,
+            created_at: time.now()
+        }
+        self.items.push(b)
+        give b
+    }
+
+    fn remove(self, id: Text) -> Bool {
+        var fresh: [Bookmark] = []
+        var found = false
+        for b in self.items {
+            if b.id == id { found = true }
+            else { fresh.push(b) }
+        }
+        self.items = fresh
+        give found
+    }
+
+    fn search(self, query: Text) -> [Bookmark] {
+        let q = query.trim().lower()
+        if q == "" { give self.items }
+        var matches: [Bookmark] = []
+        for b in self.items {
+            if b.title.lower().contains(q) or b.url.lower().contains(q) or b.folder.lower().contains(q) {
+                matches.push(b)
+            }
+        }
+        give matches
+    }
+
+    fn to_json(self) -> Text {
+        var list: [Any] = []
+        for b in self.items {
+            list.push([
+                "id": b.id,
+                "title": b.title,
+                "url": b.url,
+                "folder": b.folder,
+                "tags": b.tags,
+                "created_at": b.created_at
+            ])
+        }
+        give json.write(list)
+    }
+}

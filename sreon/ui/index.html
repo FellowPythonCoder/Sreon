@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-density="default" data-sidebar="left" data-tabstyle="horizontal">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sreon — The Next Generation of Browsing</title>
+  <link rel="icon" type="image/png" href="assets/sreon-32.png">
+  <link rel="stylesheet" href="css/sreon.css">
+</head>
+<body class="sreon-app">
+  <!-- Sreon Background Canvas / Ambient Lighting Scene -->
+  <div class="ambient-glow" id="ambientGlow"></div>
+  <div class="ambient-mesh" id="ambientMesh"></div>
+
+  <!-- Sreon App Shell Container -->
+  <div class="sreon-window" id="sreonWindow">
+    
+    <!-- TOP SECTION: macOS Titlebar + Advanced Tab Strip -->
+    <header class="sreon-header">
+      <!-- Traffic Light Controls & Brand Mark -->
+      <div class="window-controls-container">
+        <div class="traffic-lights">
+          <button class="traffic-light close" title="Close Window" id="btnWinClose"></button>
+          <button class="traffic-light minimize" title="Minimize Window" id="btnWinMin"></button>
+          <button class="traffic-light maximize" title="Maximize Window" id="btnWinMax"></button>
+        </div>
+        <div class="header-brand" id="headerBrand" title="Sreon · Powered by SPRFST Language">
+          <img src="assets/sreon-32.png" alt="Sreon" class="brand-logo-img">
+          <span class="brand-name">SREON</span>
+          <span class="brand-sub">Powered by SPRFST</span>
+        </div>
+      </div>
+
+      <!-- Advanced Horizontal Tab Strip -->
+      <nav class="tab-strip-wrapper" id="tabStripWrapper">
+        <div class="tab-strip" id="tabStrip">
+          <!-- Rendered dynamically: pinned tabs, group badges, active tab -->
+        </div>
+        <button class="tab-add-btn" id="btnNewTab" title="New Tab (⌘T)">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+      </nav>
+
+      <!-- Window Right Quick Actions -->
+      <div class="header-actions">
+        <!-- Workspace Selector Badge -->
+        <div class="workspace-pill" id="workspacePill" title="Switch Workspace">
+          <span class="workspace-dot" id="workspaceDot"></span>
+          <span class="workspace-name" id="workspacePillName">General</span>
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+
+        <button class="header-icon-btn" id="btnTabSearch" title="Search Tabs (⇧⌘A)">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        </button>
+        <button class="header-icon-btn" id="btnVerticalTabsToggle" title="Toggle Vertical Tabs">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- FLOATING GLASS TOOLBAR (Navigation, Address Bar Centerpiece, Quick Actions) -->
+    <section class="floating-toolbar" id="floatingToolbar">
+      <!-- Navigation Controls -->
+      <div class="nav-controls">
+        <button class="nav-btn" id="btnBack" title="Back (⌘[)" disabled>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <button class="nav-btn" id="btnForward" title="Forward (⌘])" disabled>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+        <button class="nav-btn" id="btnReload" title="Reload (⌘R)">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" class="reload-icon"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 11-.57-8.38l5.67-5.19"/></svg>
+        </button>
+        <button class="nav-btn" id="btnHome" title="Home / Start Page (⇧⌘1)">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>
+        </button>
+      </div>
+
+      <!-- CENTERPIECE UNIFIED ADDRESS & SEARCH BAR -->
+      <div class="address-bar-container" id="addressBarContainer">
+        <!-- Search Engine Dropdown Trigger -->
+        <button class="search-engine-badge" id="btnEngineSelect" title="Select Search Engine">
+          <span class="engine-icon" id="currentEngineIcon">⚡</span>
+          <span class="engine-name" id="currentEngineName">DDG</span>
+          <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+
+        <!-- Security Badge -->
+        <button class="security-badge secure" id="btnSecurityBadge" title="Connection is Secure (TLS/HTTPS)">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        </button>
+
+        <!-- Main Input Field -->
+        <input type="text" class="address-input" id="addressInput" 
+               placeholder="Search or enter web address..." 
+               autocomplete="off" spellcheck="false" 
+               value="sreon://start">
+
+        <!-- Sreon Shield Active Counter Badge -->
+        <button class="shield-badge" id="btnShieldBadge" title="Sreon Shield: Ad & Tracker Blocking Active">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5zm-1 15l-4-4 1.41-1.41L11 14.17l5.59-5.59L18 10l-7 7z"/></svg>
+          <span class="shield-count" id="shieldBadgeCount">14</span>
+        </button>
+
+        <!-- Right Inside Address Bar Actions -->
+        <div class="address-inner-actions">
+          <button class="address-icon-btn" id="btnBookmarkPage" title="Bookmark This Page (⌘D)">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+          </button>
+          <button class="address-icon-btn" id="btnSaveToVault" title="Save to Reading Vault">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20M4 4.5A2.5 2.5 0 016.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15z"/></svg>
+          </button>
+          <button class="address-icon-btn" id="btnLensReader" title="Lens Article Mode (⌘K)">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+          </button>
+        </div>
+
+        <!-- Autocomplete Suggestions Dropdown -->
+        <div class="address-suggestions" id="addressSuggestions" style="display: none;"></div>
+      </div>
+
+      <!-- Right Toolbar Shortcuts -->
+      <div class="toolbar-right-actions">
+        <button class="toolbar-btn ai-btn" id="btnToggleAI" title="Sreon AI Workspace (⌘I)">
+          <span class="sparkle-icon">✨</span>
+          <span class="btn-text">AI</span>
+        </button>
+        <button class="toolbar-btn" id="btnToggleSplit" title="Split View Browsing (⌘\)">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 3v18"/></svg>
+        </button>
+        <button class="toolbar-btn dev-btn" id="btnLaunchStudio" title="Sreon Studio IDE (⌘O)">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>
+          <span class="btn-text">Studio</span>
+        </button>
+        <button class="toolbar-btn" id="btnCommandPalette" title="Command Palette (⌘P)">
+          <kbd>⌘K</kbd>
+        </button>
+        <button class="toolbar-btn" id="btnDownloadsPopover" title="Downloads">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          <span class="download-badge" id="downloadBadge" style="display:none;">1</span>
+        </button>
+        <button class="toolbar-btn" id="btnSettings" title="Customization & Settings (⌘,)">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- MAIN BODY: 12-Panel Sidebar + Main Viewport -->
+    <div class="sreon-body" id="sreonBody">
+
+      <!-- NEXT-GENERATION 12-PANEL GLASS SIDEBAR -->
+      <aside class="sreon-sidebar" id="sreonSidebar">
+        <!-- Icon Rail (Always Visible) -->
+        <div class="sidebar-rail">
+          <button class="rail-btn" data-panel="ai" title="1. Sreon AI Workspace (⌘I)">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+            <span class="rail-label">AI</span>
+          </button>
+          <button class="rail-btn" data-panel="shield" title="2. Ad & Tracker Shield (⇧⌘D)">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span class="rail-label">Shield</span>
+          </button>
+          <button class="rail-btn" data-panel="bookmarks" title="3. Smart Bookmarks (⌥⌘B)">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+            <span class="rail-label">Saved</span>
+          </button>
+          <button class="rail-btn" data-panel="vault" title="4. Reading Vault (⌥⌘R)">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20M4 4.5A2.5 2.5 0 016.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15z"/></svg>
+            <span class="rail-label">Vault</span>
+          </button>
+          <button class="rail-btn" data-panel="downloads" title="5. Downloads (⌥⌘L)">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            <span class="rail-label">Files</span>
+          </button>
+          <button class="rail-btn" data-panel="notes" title="6. Page Notes (⌥⌘N)">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+            <span class="rail-label">Notes</span>
+          </button>
+          <button class="rail-btn" data-panel="focus" title="7. Focus Mode">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span class="rail-label">Focus</span>
+          </button>
+          <button class="rail-btn" data-panel="split" title="8. Split View">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 3v18"/></svg>
+            <span class="rail-label">Split</span>
+          </button>
+          <button class="rail-btn" data-panel="workspaces" title="9. Workspace Manager">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></svg>
+            <span class="rail-label">Spaces</span>
+          </button>
+          <button class="rail-btn" data-panel="devtools" title="10. Developer Tools">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>
+            <span class="rail-label">Dev</span>
+          </button>
+          <button class="rail-btn" data-panel="history" title="11. History (⌘Y)">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/><path d="M3.05 11a9 9 0 01.5-2m-.5 2h4"/></svg>
+            <span class="rail-label">History</span>
+          </button>
+          <button class="rail-btn" data-panel="tools" title="12. Quick Everyday Tools">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+            <span class="rail-label">Tools</span>
+          </button>
+        </div>
+
+        <!-- Expandable Panel Content Drawer -->
+        <div class="sidebar-drawer" id="sidebarDrawer" style="display: none;">
+          <div class="drawer-header">
+            <div class="drawer-title" id="drawerTitle">Sreon Module</div>
+            <button class="drawer-close-btn" id="btnDrawerClose" title="Collapse Panel">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+          <div class="drawer-body" id="drawerBody">
+            <!-- Dynamically populated by JS according to selected panel -->
+          </div>
+        </div>
+
+        <!-- Draggable Resizer for Sidebar -->
+        <div class="sidebar-resizer" id="sidebarResizer"></div>
+      </aside>
+
+      <!-- MAIN VIEWPORT CONTAINER -->
+      <main class="sreon-viewport" id="sreonViewport">
+        
+        <!-- View 1: Sreon Start Page (New Tab) -->
+        <div class="viewport-view active" id="viewStartPage">
+          <div class="start-page-container">
+            <!-- Hero Brand & Emblem -->
+            <div class="start-hero">
+              <div class="start-logo-wrapper">
+                <img src="assets/sreon-512.png" alt="Sreon" class="start-logo-img">
+                <div class="start-logo-glow"></div>
+              </div>
+              <h1 class="start-title">SREON</h1>
+              <p class="start-subtitle">The Next Generation of Browsing · <span class="accent-text">Powered by SPRFST Language</span></p>
+            </div>
+
+            <!-- Central Search Interface -->
+            <div class="start-search-card">
+              <div class="start-engine-pill" id="startEnginePill">
+                <span id="startEngineLabel">DuckDuckGo</span>
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+              </div>
+              <input type="text" class="start-search-input" id="startSearchInput" placeholder="Ask anything, search the web, or enter a URL...">
+              <button class="start-search-submit" id="btnStartSearch">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </button>
+            </div>
+
+            <!-- Quick Launch Speed Dial (Favorite Websites) -->
+            <div class="favorites-section">
+              <div class="section-title-row">
+                <span class="section-title">Favorites & Workspaces</span>
+                <button class="section-action-btn" id="btnAddFavorite">+ Add</button>
+              </div>
+              <div class="favorites-grid" id="favoritesGrid">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+
+            <!-- Interactive Daily Widgets Row -->
+            <div class="start-widgets-row">
+              <!-- Widget 1: Live Digital Clock & System Status -->
+              <div class="widget-card clock-widget">
+                <div class="widget-header">
+                  <span class="widget-tag">LOCAL TIME</span>
+                  <span class="live-dot"></span>
+                </div>
+                <div class="clock-display" id="clockDisplay">12:00:00</div>
+                <div class="date-display" id="dateDisplay">Saturday, October 10</div>
+              </div>
+
+              <!-- Widget 2: Sreon Shield Live Statistics -->
+              <div class="widget-card shield-widget">
+                <div class="widget-header">
+                  <span class="widget-tag">SREON SHIELD</span>
+                  <span class="status-badge green">ACTIVE</span>
+                </div>
+                <div class="shield-stats-grid">
+                  <div class="shield-stat-item">
+                    <span class="stat-number" id="widgetStatBlocked">432</span>
+                    <span class="stat-label">Trackers Blocked</span>
+                  </div>
+                  <div class="shield-stat-item">
+                    <span class="stat-number" id="widgetStatSaved">14.8 MB</span>
+                    <span class="stat-label">Bandwidth Saved</span>
+                  </div>
+                </div>
+                <div class="widget-footer-text">Hardware-accelerated blocking enabled</div>
+              </div>
+
+              <!-- Widget 3: Sreon Studio Quick Launch -->
+              <div class="widget-card studio-widget" id="cardLaunchStudio">
+                <div class="widget-header">
+                  <span class="widget-tag">SPRFST IDE</span>
+                  <span class="status-badge orange">READY</span>
+                </div>
+                <div class="studio-card-content">
+                  <div class="studio-card-icon">⚡</div>
+                  <div class="studio-card-info">
+                    <div class="studio-card-title">Sreon Studio</div>
+                    <div class="studio-card-desc">Interactive IDE, 30 chapters & compiler</div>
+                  </div>
+                </div>
+                <button class="widget-btn orange" id="btnStartOpenStudio">Open Sreon Studio →</button>
+              </div>
+
+              <!-- Widget 4: Interactive Whiteboard Quick Launch -->
+              <div class="widget-card whiteboard-widget" id="cardLaunchWhiteboard">
+                <div class="widget-header">
+                  <span class="widget-tag">CREATIVE</span>
+                  <span class="status-badge blue">WORKSPACE</span>
+                </div>
+                <div class="studio-card-content">
+                  <div class="studio-card-icon">🎨</div>
+                  <div class="studio-card-info">
+                    <div class="studio-card-title">Infinite Whiteboard</div>
+                    <div class="studio-card-desc">Canvas, shapes, sticky notes & diagrams</div>
+                  </div>
+                </div>
+                <button class="widget-btn blue" id="btnStartOpenWhiteboard">Open Whiteboard →</button>
+              </div>
+            </div>
+
+            <!-- Brand Signature Footer -->
+            <footer class="start-footer">
+              <span class="footer-signature">Sreon · Powered by SPRFST Language · macOS Architecture</span>
+            </footer>
+          </div>
+        </div>
+
+        <!-- View 2: Live Web Browser Rendering Engine (WKWebView / Web Frame) -->
+        <div class="viewport-view" id="viewBrowser">
+          <div class="browser-frame-container" id="browserFrameContainer">
+            <!-- Simulated or Live Native WKWebView Browser Container -->
+            <iframe class="web-renderer-frame" id="webRendererFrame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" src="about:blank"></iframe>
+            
+            <!-- In-browser Floating Lens Reader Overlay -->
+            <div class="lens-reader-overlay" id="lensReaderOverlay" style="display: none;">
+              <div class="lens-header">
+                <div class="lens-title-group">
+                  <span class="lens-tag">THE LENS · READER MODE</span>
+                  <h1 class="lens-article-title" id="lensTitle">Article Title</h1>
+                  <div class="lens-meta" id="lensMeta">By Sreon Engine · 5 min read · 1,240 words</div>
+                </div>
+                <div class="lens-actions">
+                  <button class="lens-btn" id="btnLensFontToggle">Serif / Sans</button>
+                  <button class="lens-btn" id="btnLensEmberToggle">Ember Dark</button>
+                  <button class="lens-btn close" id="btnLensClose">✕</button>
+                </div>
+              </div>
+              <div class="lens-article-body" id="lensBody"></div>
+            </div>
+
+            <!-- Browser Error / Offline Screen -->
+            <div class="browser-error-screen" id="browserErrorScreen" style="display: none;">
+              <div class="error-card">
+                <div class="error-icon">⚠️</div>
+                <h2 class="error-title" id="errorTitle">Unable to Load Page</h2>
+                <p class="error-message" id="errorMessage">The requested address could not be reached.</p>
+                <div class="error-actions">
+                  <button class="error-btn retry" id="btnErrorRetry">Try Again</button>
+                  <button class="error-btn home" id="btnErrorHome">Return to Sreon Start</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- View 3: Split View (Dual Browser Side-by-Side) -->
+        <div class="viewport-view" id="viewSplitBrowsing">
+          <div class="split-view-container" id="splitViewContainer">
+            <div class="split-pane left" id="splitPaneLeft">
+              <div class="split-pane-header">
+                <input type="text" class="split-url-input" id="splitUrlLeft" value="https://news.ycombinator.com">
+                <button class="split-nav-btn" id="btnSplitGoLeft">→</button>
+              </div>
+              <iframe class="split-frame" id="splitFrameLeft" src="about:blank"></iframe>
+            </div>
+            <div class="split-divider" id="splitDivider"></div>
+            <div class="split-pane right" id="splitPaneRight">
+              <div class="split-pane-header">
+                <input type="text" class="split-url-input" id="splitUrlRight" value="https://github.com">
+                <button class="split-nav-btn" id="btnSplitGoRight">→</button>
+              </div>
+              <iframe class="split-frame" id="splitFrameRight" src="about:blank"></iframe>
+            </div>
+          </div>
+        </div>
+
+        <!-- View 4: Sreon Studio — Complete Built-In IDE -->
+        <div class="viewport-view" id="viewStudio">
+          <div class="studio-ide-container" id="studioIdeContainer">
+            <!-- IDE Sidebar: Explorer & Guidebook -->
+            <div class="ide-sidebar">
+              <div class="ide-sidebar-tabs">
+                <button class="ide-tab-btn active" data-idetab="explorer">Files</button>
+                <button class="ide-tab-btn" data-idetab="guidebook">Guidebook</button>
+                <button class="ide-tab-btn" data-idetab="examples">Examples</button>
+              </div>
+              <div class="ide-sidebar-content">
+                <!-- Explorer Tree -->
+                <div class="ide-panel-view active" id="idePanelExplorer">
+                  <div class="explorer-tree" id="explorerTree">
+                    <!-- Tree populated by JS -->
+                  </div>
+                </div>
+                <!-- Interactive Guidebook -->
+                <div class="ide-panel-view" id="idePanelGuidebook">
+                  <div class="guidebook-toc" id="guidebookToc">
+                    <!-- 30 Chapters populated by JS -->
+                  </div>
+                </div>
+                <!-- Examples List -->
+                <div class="ide-panel-view" id="idePanelExamples">
+                  <div class="examples-list" id="examplesList">
+                    <!-- 21 Examples populated by JS -->
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- IDE Main Code Workbench -->
+            <div class="ide-workbench">
+              <!-- Workbench Toolbar -->
+              <div class="ide-toolbar">
+                <div class="ide-file-tabs" id="ideFileTabs">
+                  <div class="ide-file-tab active" data-file="src/main.spf">
+                    <span class="spf-icon">⚡</span>
+                    <span class="tab-filename">main.spf</span>
+                    <span class="tab-unsaved-dot"></span>
+                  </div>
+                </div>
+                <div class="ide-actions">
+                  <button class="ide-action-btn run" id="btnIdeRun" title="Compile and Execute (⌘Enter)">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                    <span>Run</span>
+                  </button>
+                  <button class="ide-action-btn check" id="btnIdeCheck" title="Type Check">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+                    <span>Check</span>
+                  </button>
+                  <button class="ide-action-btn fmt" id="btnIdeFmt" title="Format Code">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10H3M21 6H3M21 14H3M21 18H3"/></svg>
+                    <span>Format</span>
+                  </button>
+                  <button class="ide-action-btn lint" id="btnIdeLint" title="Lint Code">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <span>Lint</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Code Editor Surface -->
+              <div class="ide-editor-container" id="ideEditorContainer">
+                <div class="line-numbers" id="ideLineNumbers"></div>
+                <textarea class="code-editor-textarea" id="ideCodeEditor" spellcheck="false" autocomplete="off" wrap="off"></textarea>
+                <div class="code-editor-highlight" id="ideCodeHighlight"></div>
+              </div>
+
+              <!-- IDE Console & Diagnostics Panel -->
+              <div class="ide-console-drawer" id="ideConsoleDrawer">
+                <div class="console-header">
+                  <div class="console-tabs">
+                    <button class="console-tab active" data-consoletab="output">Output</button>
+                    <button class="console-tab" data-consoletab="problems">Problems (0)</button>
+                    <button class="console-tab" data-consoletab="guide-view">Guidebook Reader</button>
+                  </div>
+                  <button class="console-clear-btn" id="btnConsoleClear">Clear</button>
+                </div>
+                <div class="console-content" id="ideConsoleContent">
+                  <pre class="console-output" id="ideConsoleOutput"><span class="console-dim">SPRFST Studio Compiler & Runtime Ready. Press "Run" or ⌘Enter to execute code.</span></pre>
+                  <div class="console-problems" id="ideConsoleProblems" style="display: none;"></div>
+                  <div class="guidebook-article-view" id="guidebookArticleView" style="display: none;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- View 5: Interactive Infinite Whiteboard -->
+        <div class="viewport-view" id="viewWhiteboard">
+          <div class="whiteboard-container" id="whiteboardContainer">
+            <!-- Floating Whiteboard Glass Toolbar -->
+            <div class="whiteboard-toolbar">
+              <div class="wb-tool-group">
+                <button class="wb-tool-btn active" data-wbtool="select" title="Select / Move">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M7 2l12 11.2-5.8.5 3.3 7.3-2.2 1-3.2-7.4L7 18.5V2z"/></svg>
+                </button>
+                <button class="wb-tool-btn" data-wbtool="pen" title="Freehand Pen">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3zM18 13l-1.5-1.5M2 22l5-2 13-13-3-3L4 17l-2 5z"/></svg>
+                </button>
+                <button class="wb-tool-btn" data-wbtool="rect" title="Rectangle">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+                </button>
+                <button class="wb-tool-btn" data-wbtool="circle" title="Circle">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>
+                </button>
+                <button class="wb-tool-btn" data-wbtool="arrow" title="Arrow Connector">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </button>
+                <button class="wb-tool-btn" data-wbtool="text" title="Text Card">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+                </button>
+                <button class="wb-tool-btn" data-wbtool="sticky" title="Sticky Note">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+                </button>
+              </div>
+
+              <!-- Color Palette -->
+              <div class="wb-color-group">
+                <span class="wb-color-dot active" data-color="#FF6B00" style="background:#FF6B00;"></span>
+                <span class="wb-color-dot" data-color="#FFA136" style="background:#FFA136;"></span>
+                <span class="wb-color-dot" data-color="#3B82F6" style="background:#3B82F6;"></span>
+                <span class="wb-color-dot" data-color="#10B981" style="background:#10B981;"></span>
+                <span class="wb-color-dot" data-color="#EC4899" style="background:#EC4899;"></span>
+                <span class="wb-color-dot" data-color="#FFFFFF" style="background:#FFFFFF;"></span>
+              </div>
+
+              <!-- Template Selector -->
+              <div class="wb-template-group">
+                <select class="wb-select" id="wbTemplateSelect">
+                  <option value="">Templates...</option>
+                  <option value="brainstorming">Brainstorming Grid</option>
+                  <option value="architecture">System Architecture</option>
+                  <option value="flowchart">User Journey Flow</option>
+                  <option value="sprint">Sprint Board</option>
+                </select>
+              </div>
+
+              <!-- Whiteboard Actions -->
+              <div class="wb-action-group">
+                <button class="wb-btn" id="btnWbUndo" title="Undo">↩</button>
+                <button class="wb-btn" id="btnWbRedo" title="Redo">↪</button>
+                <button class="wb-btn" id="btnWbClear" title="Clear Canvas">Clear</button>
+                <button class="wb-btn accent" id="btnWbExportSvg" title="Export SVG">Export SVG</button>
+              </div>
+            </div>
+
+            <!-- Canvas Element -->
+            <div class="whiteboard-canvas-wrapper" id="wbCanvasWrapper">
+              <canvas class="whiteboard-canvas" id="whiteboardCanvas"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- View 6: Everyday Productivity Suite (All 21 Working Tools) -->
+        <div class="viewport-view" id="viewTools">
+          <div class="tools-suite-container">
+            <div class="tools-suite-header">
+              <div class="tools-header-text">
+                <h1 class="tools-title">Everyday Productivity Suite</h1>
+                <p class="tools-desc">21 precision utilities built directly into Sreon with instant offline execution.</p>
+              </div>
+              <div class="tools-search-box">
+                <input type="text" class="tools-search-input" id="toolsSearchInput" placeholder="Filter tools...">
+              </div>
+            </div>
+
+            <!-- Tools Tab Bar -->
+            <div class="tools-tab-bar" id="toolsTabBar">
+              <!-- Dynamically populated / switched -->
+            </div>
+
+            <!-- Tools Active Workspace Surface -->
+            <div class="tools-active-surface" id="toolsActiveSurface">
+              <!-- Rendered dynamically by active tool -->
+            </div>
+          </div>
+        </div>
+
+        <!-- View 7: Advanced Customization Center (Settings) -->
+        <div class="viewport-view" id="viewSettings">
+          <div class="settings-container">
+            <div class="settings-sidebar">
+              <h2 class="settings-nav-header">Settings</h2>
+              <button class="settings-nav-btn active" data-section="appearance">Appearance & Glass</button>
+              <button class="settings-nav-btn" data-section="browser">Browser Behavior</button>
+              <button class="settings-nav-btn" data-section="shield">Sreon Shield</button>
+              <button class="settings-nav-btn" data-section="studio">Developer & IDE</button>
+              <button class="settings-nav-btn" data-section="about">About Sreon</button>
+            </div>
+
+            <div class="settings-content" id="settingsContent">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+
+    <!-- COMMAND PALETTE MODAL (⌘K / ⌘P) -->
+    <div class="command-palette-backdrop" id="commandPalette" style="display: none;">
+      <div class="command-palette-card">
+        <div class="palette-input-wrapper">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#FFA136" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input type="text" class="palette-input" id="paletteInput" placeholder="Type a command, search tabs, history, or tools...">
+          <kbd class="palette-kbd">ESC</kbd>
+        </div>
+        <div class="palette-results" id="paletteResults"></div>
+      </div>
+    </div>
+
+    <!-- BOTTOM STATUS BAR -->
+    <footer class="sreon-status-bar">
+      <div class="status-left" id="statusLeft">
+        <span class="status-indicator"></span>
+        <span class="status-text" id="statusText">Sreon Engine 1.0.0 · Ready</span>
+      </div>
+      <div class="status-right" id="statusRight">
+        <span class="status-metric" id="statusMetricCost">0 ms</span>
+        <span class="status-sep">·</span>
+        <span class="status-metric" id="statusMetricBlocked">0 blocked</span>
+        <span class="status-sep">·</span>
+        <span class="status-metric" id="statusMetricRules">432 rules active</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <script src="js/sreon.js"></script>
+</body>
+</html>
