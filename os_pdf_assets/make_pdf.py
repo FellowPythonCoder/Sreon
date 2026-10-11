@@ -140,6 +140,87 @@ class Picture(Flowable):
         if self.cap_p:
             self.cap_p.drawOn(c, 0, 2)
 
+class CodeBlock(Flowable):
+    """A pretty box of monospace code."""
+    def __init__(self, code, caption=None, font_size=8.3):
+        super().__init__()
+        self.code = code.strip("\n")
+        self.fs = font_size
+        self.caption = caption
+        self.cap_p = Paragraph(caption, S_CAP) if caption else None
+
+    def wrap(self, aw, ah):
+        self.w = aw
+        ch = 0
+        if self.cap_p:
+            _, ch = self.cap_p.wrap(aw, ah)
+        self.cap_h = ch + 4
+        self.n_lines = self.code.count("\n") + 1
+        self.line_h = self.fs * 1.32
+        self.h = self.n_lines * self.line_h + 0.55 * cm + self.cap_h
+        return aw, self.h
+
+    def draw(self):
+        c = self.canv
+        box_h = self.h - self.cap_h
+        c.setFillColor(HexColor("#F6F3EC"))
+        c.setStrokeColor(HexColor("#C9CFDA"))
+        c.setLineWidth(1)
+        c.roundRect(0, self.cap_h, self.w, box_h, 8, stroke=1, fill=1)
+        c.setFillColor(TEAL)
+        c.roundRect(0, self.cap_h, 0.22 * cm, box_h, 8, stroke=0, fill=1)
+        c.rect(0, self.cap_h + 8, 0.22 * cm, box_h - 16, stroke=0, fill=1)
+        y = self.cap_h + box_h - 0.42 * cm
+        for line in self.code.split("\n"):
+            stripped = line.strip()
+            if stripped.startswith(";") or stripped.startswith("//") or \
+               stripped.startswith("/*") or stripped.startswith("*") or \
+               stripped.startswith("# "):
+                c.setFillColor(HexColor("#6E8B5B"))
+                c.setFont("Courier-Oblique", self.fs)
+            elif stripped.startswith("#"):
+                c.setFillColor(ORANGE)
+                c.setFont("Courier-Bold", self.fs)
+            else:
+                c.setFillColor(NAVY)
+                c.setFont("Courier", self.fs)
+            c.drawString(0.5 * cm, y, line.replace("\t", "    "))
+            y -= self.line_h
+        if self.cap_p:
+            self.cap_p.drawOn(c, 0, 0)
+
+
+class PartBanner(Flowable):
+    """Big divider banner: PART TWO - ..."""
+    def __init__(self, part, title, subtitle, color, width=None):
+        super().__init__()
+        self.part = part
+        self.title = title
+        self.subtitle = subtitle
+        self.color = color
+        self.bar_width = width
+
+    def wrap(self, aw, ah):
+        self.w = self.bar_width or aw
+        self.h = 5.2 * cm
+        return self.w, self.h
+
+    def draw(self):
+        c = self.canv
+        c.setFillColor(self.color)
+        c.roundRect(0, 1.2 * cm, self.w, 4.0 * cm, 16, stroke=0, fill=1)
+        c.setFillColor(white)
+        c.setFont("Helvetica-Bold", 15)
+        c.drawCentredString(self.w / 2, 4.35 * cm, self.part)
+        c.setFont("Helvetica-Bold", 26)
+        c.drawCentredString(self.w / 2, 3.25 * cm, self.title)
+        c.setFont("Helvetica", 12.5)
+        c.drawCentredString(self.w / 2, 2.35 * cm, self.subtitle)
+        c.setFillColor(GOLD)
+        c.roundRect(self.w / 2 - 3.2 * cm, 1.55 * cm, 6.4 * cm, 0.22 * cm,
+                    4, stroke=0, fill=1)
+
+
 class Diagram(Flowable):
     def __init__(self, height):
         super().__init__()
@@ -410,8 +491,8 @@ def build():
     story.append(Spacer(1, 1.1 * cm))
     story.append(Paragraph("HOW A COMPUTER<br/>WAKES UP", S_COVER1))
     story.append(Spacer(1, 0.45 * cm))
-    story.append(Paragraph("Operating-system development explained with pictures<br/>"
-                           "for people who DON'T code", S_COVER2))
+    story.append(Paragraph("The picture guide to OS development - plus a complete coding course"
+                           "<br/>so you can BUILD one on your Mac", S_COVER2))
     story.append(Spacer(1, 0.8 * cm))
     story.append(Picture(os.path.join(A, "cover.jpg"), width=11 * cm))
     story.append(Spacer(1, 0.5 * cm))
@@ -426,6 +507,7 @@ def build():
     story.append(ChapterTitle("?", "What's inside this mini-book", TEAL, width=W))
     story.append(Spacer(1, 0.5 * cm))
     toc_items = [
+        ("part", "PART ONE - THE BIG PICTURE", ""),
         ("1", "What even IS an operating system?", "the boss inside your computer"),
         ("2", "How a computer wakes up", "power button - BIOS - GRUB - your OS"),
         ("3", "The secret handshake", "hello, 0xCAFEBABE!"),
@@ -441,11 +523,39 @@ def build():
         ("13", "Ringing the service bell", "system calls"),
         ("14", "Doing everything at once", "multitasking"),
         ("15", "You made it!", "the whole journey in one breath"),
+        ("part", "PART TWO - LEARN TO CODE, FROM ZERO", ""),
+        ("16", "What programming really is", "recipes for a very obedient helper"),
+        ("17", "Your first C programs", "values, variables, choices and loops"),
+        ("18", "Functions", "recipes inside recipes"),
+        ("19", "Memory, pointers and structs", "the mailboxes behind it all"),
+        ("20", "Compiler, linker and Make", "from text file to running program"),
+        ("21", "Assembly in one sitting", "the CPU's own language"),
+        ("22", "Set up your Mac workshop", "tools, folders and make run"),
+        ("part", "PART THREE - BUILD YOUR OS, MILESTONE BY MILESTONE", ""),
+        ("23", "Milestone 0: the spark", "loader.s, link.ld and QEMU"),
+        ("24", "Milestone 1: your C code runs", "kmain and the magic flags"),
+        ("25", "Milestone 2: the screen driver", "letters on the light board"),
+        ("26", "Milestone 3: the logbook", "the serial port driver"),
+        ("27", "Milestone 4: the boss's uniform", "the GDT, for real"),
+        ("28", "Milestone 5: doorbells", "IDT, PIC and exceptions"),
+        ("29", "Milestone 6: your OS reads keys", "the keyboard driver"),
+        ("30", "Milestone 7: fake addresses on", "paging"),
+        ("31", "Milestone 8: the landlord", "the page-frame allocator"),
+        ("32", "Milestone 9: user mode!", "system calls and your first app"),
+        ("33", "Your finished OS", "debugging cookbook &amp; next steps"),
     ]
-    for n, t, s in toc_items:
+    for n, t, sub in toc_items:
+        if n == "part":
+            story.append(Spacer(1, 0.22 * cm))
+            story.append(Paragraph(
+                f'<font color="#1B9AAA"><b>{t}</b></font>',
+                ParagraphStyle("tocpart", fontName="Helvetica-Bold",
+                               fontSize=12.5, leading=18, textColor=NAVY,
+                               spaceBefore=6, spaceAfter=2)))
+            continue
         story.append(Paragraph(
             f'<font color="#1B9AAA"><b>[{n}]</b></font>&nbsp;&nbsp;<b>{t}</b>'
-            f'&nbsp;&mdash;&nbsp;<i>{s}</i>', S_TOC))
+            f'&nbsp;&mdash;&nbsp;<i>{sub}</i>', S_TOC))
     story.append(Spacer(1, 0.4 * cm))
     story.append(RoundedBox(
         "How to read this",
@@ -839,6 +949,9 @@ def build():
         "how people build one from scratch. If reading this made you curious about coding, that is "
         "the perfect sign. The next tiny step is yours to pick!",
         LIGHT, TEAL, width=W))
+
+    import part23
+    part23.add_parts(story, W)
 
     doc.build(story)
     print("Wrote", OUT)

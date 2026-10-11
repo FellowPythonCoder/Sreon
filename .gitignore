@@ -12,3 +12,14 @@ dist/*
 # os.pdf build artifacts
 .venv/
 os_pdf_assets/*.png
+
+# os_tutorial build outputs
+os_tutorial/*.o
+os_tutorial/*.gas.s
+os_tutorial/user/*.o
+os_tutorial/user/*.gas.s
+os_tutorial/kernel.elf
+os_tutorial/program.bin
+os_tutorial/os.iso
+os_tutorial/iso/
+__pycache__/
