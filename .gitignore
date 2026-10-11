@@ -8,3 +8,7 @@ dist/*
 !dist/*.icns
 
 *.forge
+
+# os.pdf build artifacts
+.venv/
+os_pdf_assets/*.png
